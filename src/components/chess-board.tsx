@@ -8,7 +8,7 @@ const ChessBoard = (props: Config) => {
   const [api, setApi] = useState<Api | null>(null);
 
   useEffect(() => {
-    if (boardRef.current === null) return;
+    if (boardRef?.current === null) return;
     if (api) {
       api.set({
         ...props,
@@ -16,11 +16,10 @@ const ChessBoard = (props: Config) => {
     } else {
       const chessgroundApi = Chessground(boardRef.current, {
         ...props,
-        addDimensionsCssVarsTo: boardRef.current,
       });
       setApi(chessgroundApi);
     }
-  }, [api, props]);
+  }, [api, props, boardRef]);
 
   return (
     <div className="flex items-center gap-4 ">

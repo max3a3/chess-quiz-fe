@@ -5,42 +5,45 @@ import {
   ChevronsLeftIcon,
   ChevronsRightIcon,
 } from "lucide-react";
+import { useContext } from "react";
+import { useStore } from "zustand";
 
-interface MoveControlsProps {
-  goToStart: () => void;
-  goToEnd: () => void;
-  goToPrevious: () => void;
-  goToNext: () => void;
-}
+import { ChessStateContext } from "@/provider/chess-state-context";
 
-const MoveControls = (props: MoveControlsProps) => {
-  useHotkeys("arrowdown", props.goToEnd);
-  useHotkeys("arrowup", props.goToStart);
-  useHotkeys("arrowleft", props.goToPrevious);
-  useHotkeys("arrowright", props.goToNext);
+const MoveControls = () => {
+  const store = useContext(ChessStateContext)!;
+  const goToStart = useStore(store, (s) => s.goToStart);
+  const goToEnd = useStore(store, (s) => s.goToEnd);
+  const goToPrevious = useStore(store, (s) => s.goToPrevious);
+  const goToNext = useStore(store, (s) => s.goToNext);
+
+  useHotkeys("arrowdown", goToEnd);
+  useHotkeys("arrowup", goToStart);
+  useHotkeys("arrowleft", goToPrevious);
+  useHotkeys("arrowright", goToNext);
 
   return (
     <div className="flex gap-2">
       <button
-        onClick={props.goToStart}
+        onClick={goToStart}
         className="flex justify-center items-center flex-1 py-1 bg-slate-50 rounded-md border hover:bg-slate-100 focus:outline-none"
       >
         <ChevronsLeftIcon />
       </button>
       <button
-        onClick={props.goToPrevious}
+        onClick={goToPrevious}
         className="flex justify-center items-center flex-1 py-1 bg-slate-50 rounded-md border hover:bg-slate-100 focus:outline-none"
       >
         <ChevronLeftIcon />
       </button>
       <button
-        onClick={props.goToNext}
+        onClick={goToNext}
         className="flex justify-center items-center flex-1 py-1 bg-slate-50 rounded-md border hover:bg-slate-100 focus:outline-none"
       >
         <ChevronRightIcon />
       </button>
       <button
-        onClick={props.goToEnd}
+        onClick={goToEnd}
         className="flex justify-center items-center flex-1 py-1 bg-slate-50 rounded-md border hover:bg-slate-100 focus:outline-none"
       >
         <ChevronsRightIcon />

@@ -1,27 +1,17 @@
-import { useMemo } from "react";
+import { useContext, useMemo } from "react";
+import { useStore } from "zustand";
 
 import MoveCell from "@/components/move-cell";
 import MoveControls from "@/components/move-controls";
+import { ChessStateContext } from "@/provider/chess-state-context";
 
-interface ChessDashboardProps {
-  history: { fen: string; move: string }[];
-  moveIndex: number;
-  goToMove: (index: number) => void;
-  goToStart: () => void;
-  goToEnd: () => void;
-  goToPrevious: () => void;
-  goToNext: () => void;
-}
+const ChessDashboard = () => {
+  const store = useContext(ChessStateContext)!;
+  const history = useStore(store, (s) => s.history);
+  const moveIndex = useStore(store, (s) => s.moveIndex);
 
-const ChessDashboard = ({
-  history,
-  moveIndex,
-  goToMove,
-  goToStart,
-  goToEnd,
-  goToPrevious,
-  goToNext,
-}: ChessDashboardProps) => {
+  const goToMove = useStore(store, (s) => s.goToMove);
+
   const groupedHistory = useMemo(
     () =>
       history.reduce<{ fen: string; move: string }[][]>((acc, item, index) => {
@@ -59,12 +49,7 @@ const ChessDashboard = ({
           ))}
         </div>
       </div>
-      <MoveControls
-        goToStart={goToStart}
-        goToEnd={goToEnd}
-        goToPrevious={goToPrevious}
-        goToNext={goToNext}
-      />
+      <MoveControls />
     </div>
   );
 };

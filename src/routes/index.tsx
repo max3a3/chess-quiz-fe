@@ -1,102 +1,116 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
-import { Chess } from "chess.js";
-import * as cg from "chessground/types";
+import { useAtom } from "jotai/react";
+import { useCallback, useEffect } from "react";
+import { PlusIcon } from "lucide-react";
 
-import { getValidMoves } from "@/utils/chessops";
-import ChessBoard from "@/components/chess-board";
-import ChessDashboard from "@/components/chess-dashboard";
-import { playSound } from "@/utils/sound";
+import { activeTabAtom, tabsAtom } from "@/state/atoms";
+import { createTab, Tab } from "@/utils/tabs";
+import BoardTabTrigger from "@/components/board-tab-trigger";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
+import ChessStateProvider from "@/provider/chess-state-context";
+import BoardSection from "@/components/board-section";
 
 export const Route = createFileRoute("/")({
   component: HomePage,
 });
 
 function HomePage() {
-  const [game, setGame] = useState<Chess>(new Chess());
+  const [tabs, setTabs] = useAtom(tabsAtom);
+  const [activeTab, setActiveTab] = useAtom(activeTabAtom);
 
-  const [moveIndex, setMoveIndex] = useState(-1);
-  const [history, setHistory] = useState<{ fen: string; move: string }[]>([]);
+  useEffect(() => {
+    if (tabs.length === 0) {
+      createTab({
+        tab: { title: "New Game" },
+        setTabs,
+        setActiveTab,
+      });
+    }
+  }, [tabs]);
 
-  let fen = game.fen();
-  let turnColor: "white" | "black" = game.turn() === "w" ? "white" : "black";
-  let dests = useMemo(() => getValidMoves(game), [game]);
-  let isLastMove = moveIndex === history.length - 1;
+  const closeTab = useCallback(
+    (id: string) => {
+      if (id === activeTab) {
+        const index = tabs.findIndex((tab) => tab.id === id);
+        if (tabs.length > 1) {
+          if (index === tabs.length - 1) {
+            setActiveTab(tabs[index - 1].id);
+          } else {
+            setActiveTab(tabs[index + 1].id);
+          }
+        } else {
+          setActiveTab(null);
+        }
+      }
+      setTabs((prev) => prev.filter((tab) => tab.id !== id));
+    },
+    [tabs, activeTab, setTabs, setActiveTab]
+  );
 
-  const handleMove = (orig: cg.Key, dest: cg.Key) => {
-    const gameCopy = new Chess(game.fen());
-    const move = gameCopy.move({ from: orig, to: dest, promotion: "q" });
-    setGame(gameCopy);
-    setHistory((prev) => [
-      ...prev,
-      {
-        fen: move.after,
-        move: move.san,
-      },
-    ]);
-    setMoveIndex((prev) => prev + 1);
-    playSound(move.san.includes("x"), move.san.includes("+"));
-  };
+  const selectTab = useCallback(
+    (id: string) => {
+      setActiveTab(id);
+    },
+    [setActiveTab]
+  );
 
-  const goToMove = (index: number) => {
-    if (moveIndex === index) return;
-    const gameCopy = new Chess(history[index].fen);
-    setGame(gameCopy);
-    setMoveIndex(index);
-  };
-
-  const goToStart = () => {
-    setGame(new Chess());
-    setMoveIndex(-1);
-  };
-  const goToPrevious = () => {
-    if (moveIndex === -1) return;
-    moveIndex === 0
-      ? setGame(new Chess())
-      : setGame(new Chess(history[moveIndex - 1].fen));
-    setMoveIndex((prev) => prev - 1);
-  };
-  const goToNext = () => {
-    if (isLastMove) return;
-    setGame(new Chess(history[moveIndex + 1].fen));
-    setMoveIndex((prev) => prev + 1);
-    const san = history[moveIndex + 1].move;
-    playSound(san.includes("x"), san.includes("+"));
-  };
-  const goToEnd = () => {
-    if (isLastMove) return;
-    setGame(new Chess(history[history.length - 1].fen));
-    setMoveIndex(history.length - 1);
-  };
+  const renameTab = useCallback(
+    (id: string, title: string) => {
+      setTabs((prev) =>
+        prev.map((tab) => {
+          if (tab.id === id) {
+            return { ...tab, title };
+          }
+          return tab;
+        })
+      );
+    },
+    [setTabs]
+  );
 
   return (
-    <div className="flex gap-4 p-2">
-      <ChessBoard
-        fen={fen}
-        animation={{ enabled: true }}
-        draggable={{ enabled: true }}
-        drawable={{ enabled: true, visible: true }}
-        check={game.isCheck() && turnColor}
-        movable={{
-          free: false,
-          color: isLastMove ? turnColor : undefined,
-          dests,
-          showDests: true,
-        }}
-        events={{
-          move: handleMove,
-        }}
-        coordinates={false}
-      />
-      <ChessDashboard
-        history={history}
-        moveIndex={moveIndex}
-        goToMove={goToMove}
-        goToStart={goToStart}
-        goToPrevious={goToPrevious}
-        goToNext={goToNext}
-        goToEnd={goToEnd}
-      />
-    </div>
+    <Tabs value={activeTab || undefined} className="space-y-3 p-4">
+      <div className="flex gap-2">
+        {tabs.map((tab) => (
+          <BoardTabTrigger
+            key={tab.id}
+            tab={tab}
+            selected={tab.id === activeTab}
+            selectTab={selectTab}
+            renameTab={renameTab}
+            closeTab={closeTab}
+          />
+        ))}
+        <button
+          onClick={() =>
+            createTab({
+              tab: {
+                title: "New Game",
+              },
+              setTabs,
+              setActiveTab,
+            })
+          }
+          className="flex items-center justify-center size-10 border rounded-md transition-colors hover:bg-slate-100"
+        >
+          <PlusIcon className="size-5" />
+        </button>
+      </div>
+      <div>
+        {tabs.map((tab) => (
+          <TabsContent key={tab.id} value={tab.id}>
+            <TabSwitch tab={tab} />
+          </TabsContent>
+        ))}
+      </div>
+    </Tabs>
+  );
+}
+
+function TabSwitch({ tab }: { tab: Tab }) {
+  return (
+    <ChessStateProvider id={tab.id}>
+      <BoardSection />
+    </ChessStateProvider>
   );
 }
