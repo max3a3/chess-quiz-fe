@@ -1,14 +1,19 @@
-import { Chess } from "chess.js";
-import * as cg from "chessground/types";
+import { Chess, PositionError } from "chessops";
+import { FenError, parseFen } from "chessops/fen";
 
-// 유효한 이동 가능 경로 가져오기
-export function getValidMoves(chess: Chess): Map<cg.Key, cg.Key[]> {
-  const dests = new Map<cg.Key, cg.Key[]>();
-  chess.moves({ verbose: true }).forEach((move) => {
-    if (!dests.has(move.from)) {
-      dests.set(move.from, []);
-    }
-    dests.get(move.from)?.push(move.to);
-  });
-  return dests;
+export function positionFromFen(
+  fen: string
+): [Chess, null] | [null, FenError | PositionError] {
+  const [setup, error] = parseFen(fen).unwrap(
+    (v) => [v, null],
+    (e) => [null, e]
+  );
+  if (error) {
+    return [null, error];
+  }
+
+  return Chess.fromSetup(setup).unwrap(
+    (v) => [v, null],
+    (e) => [null, e]
+  );
 }

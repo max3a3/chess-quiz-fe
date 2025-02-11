@@ -1,20 +1,28 @@
 import { type StateCreator, createStore } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import { produce } from "immer";
-import { Chess } from "chess.js";
-import * as cg from "chessground/types";
+import { Move } from "chessops";
+import { INITIAL_FEN, makeFen } from "chessops/fen";
+import { makeSan } from "chessops/san";
 
 import { playSound } from "@/utils/sound";
-import { INITIAL_FEN } from "@/lib/utils";
+import { positionFromFen } from "@/utils/chessops";
+
+export type Node = {
+  fen: string;
+  move: Move | null;
+  san: string | null;
+  halfMoves: number;
+};
 
 interface ChessStoreState {
-  fen: string;
   moveIndex: number;
-  history: { fen: string; move: string }[];
+  nodes: Node[];
 
-  getGameState: () => Chess;
+  currentNode: () => Node;
+  lastIndex: () => boolean;
 
-  makeMove: (args: { orig: cg.Key; dest: cg.Key }) => void;
+  makeMove: (args: { move: Move }) => void;
   goToMove: (index: number) => void;
   goToStart: () => void;
   goToEnd: () => void;
@@ -26,20 +34,30 @@ export type ChessStore = ReturnType<typeof createChessStore>;
 
 export const createChessStore = (id?: string) => {
   const stateCreator: StateCreator<ChessStoreState> = (set, get) => ({
-    fen: INITIAL_FEN,
-    moveIndex: -1,
-    history: [],
+    moveIndex: 0,
+    nodes: [{ fen: INITIAL_FEN, move: null, san: null, halfMoves: 0 }],
 
-    getGameState: () => new Chess(get().fen),
+    currentNode: () => get().nodes[get().moveIndex],
+    lastIndex: () => get().nodes.length - 1 === get().moveIndex,
 
-    makeMove: ({ orig, dest }) => {
-      const gameCopy = new Chess(get().fen);
-      const move = gameCopy.move({ from: orig, to: dest, promotion: "q" });
+    makeMove: ({ move }) => {
+      const { nodes } = get();
+      const lastNode = nodes[nodes.length - 1];
+      const [pos] = positionFromFen(lastNode.fen);
+      if (!pos) return;
+      const san = makeSan(pos, move);
+      if (san === "--") return; // invalid move
+      pos.play(move);
+      playSound(san.includes("x"), san.includes("+"));
+      const newFen = makeFen(pos.toSetup());
       set(
         produce((state) => {
-          playSound(move.san.includes("x"), move.san.includes("+"));
-          state.fen = gameCopy.fen();
-          state.history.push({ fen: move.after, move: move.san });
+          state.nodes.push({
+            fen: newFen,
+            san,
+            move,
+            halfMoves: lastNode.halfMoves + 1,
+          });
           state.moveIndex++;
         })
       );
@@ -48,7 +66,6 @@ export const createChessStore = (id?: string) => {
       if (get().moveIndex === index) return;
       set(
         produce((state) => {
-          state.fen = get().history[index].fen;
           state.moveIndex = index;
         })
       );
@@ -56,42 +73,38 @@ export const createChessStore = (id?: string) => {
     goToStart: () =>
       set(
         produce((state) => {
-          state.fen = INITIAL_FEN;
-          state.moveIndex = -1;
+          state.moveIndex = 0;
         })
       ),
     goToEnd: () => {
-      const { moveIndex, history } = get();
-      if (moveIndex === history.length - 1) return;
+      const { moveIndex, nodes } = get();
+      if (moveIndex === nodes.length - 1) return;
       set(
         produce((state) => {
-          state.fen = history[history.length - 1].fen;
-          state.moveIndex = history.length - 1;
+          state.moveIndex = nodes.length - 1;
         })
       );
     },
     goToPrevious: () => {
       const moveIndex = get().moveIndex;
-      if (moveIndex === -1) return;
+      if (moveIndex === 0) return;
       set(
         produce((state) => {
-          state.fen =
-            moveIndex === 0 ? INITIAL_FEN : get().history[moveIndex - 1].fen;
           state.moveIndex = moveIndex - 1;
         })
       );
     },
     goToNext: () => {
-      const { history, moveIndex } = get();
-      if (moveIndex === history.length - 1) return;
+      const { nodes, moveIndex } = get();
+      if (moveIndex === nodes.length - 1) return;
+      const san = nodes[moveIndex + 1].san;
+      if (!san) return;
+      playSound(san.includes("x"), san.includes("+"));
       set(
         produce((state) => {
-          state.fen = history[moveIndex + 1].fen;
           state.moveIndex = moveIndex + 1;
         })
       );
-      const san = history[moveIndex + 1].move;
-      playSound(san.includes("x"), san.includes("+"));
     },
   });
 

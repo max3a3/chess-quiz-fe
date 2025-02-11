@@ -1,51 +1,73 @@
-import { useContext, useMemo } from "react";
+import { useContext } from "react";
 import { useStore } from "zustand";
+import { makeSquare, parseSquare, SquareName } from "chessops";
+import { chessgroundDests, chessgroundMove } from "chessops/compat";
+import { match } from "ts-pattern";
 
-import { getValidMoves } from "@/utils/chessops";
+import { positionFromFen } from "@/utils/chessops";
 import ChessBoard from "@/components/chess-board";
 import ChessDashboard from "@/components/chess-dashboard";
 import { ChessStateContext } from "@/provider/chess-state-context";
-import { Chess } from "chess.js";
 
 const BoardSection = () => {
   const store = useContext(ChessStateContext)!;
 
-  const fen = useStore(store, (s) => s.fen);
-  const game = new Chess(fen);
-  const moveIndex = useStore(store, (s) => s.moveIndex);
-  const history = useStore(store, (s) => s.history);
+  const currentNode = useStore(store, (s) => s.currentNode());
+  const lastIndex = useStore(store, (s) => s.lastIndex());
 
   const makeMove = useStore(store, (s) => s.makeMove);
 
-  const turnColor: "white" | "black" =
-    game.turn() === "w" ? ("white" as const) : ("black" as const);
-  const dests = useMemo(() => getValidMoves(game), [game]);
-  const isLastMove = moveIndex === history.length - 1;
+  const [pos] = positionFromFen(currentNode.fen);
+  const turn = pos?.turn || "white";
+  const dests: Map<SquareName, SquareName[]> = pos
+    ? chessgroundDests(pos)
+    : new Map();
+
+  const square = match(currentNode)
+    .with({ san: "O-O" }, ({ halfMoves }) =>
+      parseSquare(halfMoves % 2 === 1 ? "g1" : "g8")
+    )
+    .with({ san: "O-O-O" }, ({ halfMoves }) =>
+      parseSquare(halfMoves % 2 === 1 ? "c1" : "c8")
+    )
+    .otherwise((node) => node?.move?.to);
+
+  const lastMove =
+    currentNode.move && square !== undefined
+      ? [chessgroundMove(currentNode.move)[0], makeSquare(square)!]
+      : undefined;
 
   return (
-    <section className="flex gap-4 p-2">
-      <ChessBoard
-        fen={fen}
-        animation={{ enabled: true }}
-        draggable={{ enabled: true }}
-        drawable={{ enabled: true, visible: true }}
-        check={game.isCheck() && turnColor}
-        movable={{
-          free: false,
-          // TODO: color를 동적으로 설정시 black turn일 때 이동을 할 수 없는 문제가 있음.
-          color: "both",
-          dests,
-          showDests: true,
-          events: {
-            after: (orig, dest) => makeMove({ orig, dest }),
-          },
-        }}
-        premovable={{
-          enabled: false,
-        }}
-        coordinates={false}
-      />
-      <ChessDashboard />
+    <section>
+      <div className="flex gap-4 p-2">
+        <ChessBoard
+          fen={currentNode?.fen}
+          animation={{ enabled: true }}
+          draggable={{ enabled: true }}
+          drawable={{ enabled: true, visible: true }}
+          check={pos?.isCheck()}
+          turnColor={turn}
+          lastMove={lastMove}
+          movable={{
+            free: false,
+            color: turn,
+            dests: lastIndex ? dests : undefined,
+            showDests: true,
+            events: {
+              after: (orig, dest) => {
+                const from = parseSquare(orig)!;
+                const to = parseSquare(dest)!;
+                makeMove({ move: { from, to } });
+              },
+            },
+          }}
+          premovable={{
+            enabled: false,
+          }}
+          coordinates={false}
+        />
+        <ChessDashboard />
+      </div>
     </section>
   );
 };

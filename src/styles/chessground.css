@@ -25,3 +25,8 @@ cg-board square.oc.move-dest {
 cg-board square.oc.move-dest:hover {
   background: color-mix(in srgb, #3b82f6 60%, transparent);
 }
+
+/* 마지막 이동 위치 */
+cg-board square.last-move {
+  background: color-mix(in srgb, #3b82f6 40%, transparent);
+}
