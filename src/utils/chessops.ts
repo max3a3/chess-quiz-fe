@@ -1,5 +1,6 @@
-import { Chess, PositionError } from "chessops";
+import { Chess, Move, parseUci, PositionError } from "chessops";
 import { FenError, parseFen } from "chessops/fen";
+import { parseSan } from "chessops/san";
 
 export function positionFromFen(
   fen: string
@@ -16,4 +17,18 @@ export function positionFromFen(
     (v) => [v, null],
     (e) => [null, e]
   );
+}
+
+export function parseSanOrUci(pos: Chess, sanOrUci: string): Move | null {
+  const sanParsed = parseSan(pos, sanOrUci);
+  if (sanParsed) {
+    return sanParsed;
+  }
+
+  const uciParsed = parseUci(sanOrUci);
+  if (uciParsed) {
+    return uciParsed;
+  }
+
+  return null;
 }

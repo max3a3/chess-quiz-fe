@@ -3,7 +3,9 @@ import { Chessground } from "chessground";
 import { Api } from "chessground/api";
 import { Config } from "chessground/config";
 
-const ChessBoard = (props: Config) => {
+const ChessBoard = (
+  props: Config & { setBoardFen?: (fen: string) => void }
+) => {
   const boardRef = useRef<HTMLDivElement>(null);
   const [api, setApi] = useState<Api | null>(null);
 
@@ -12,14 +14,42 @@ const ChessBoard = (props: Config) => {
     if (api) {
       api.set({
         ...props,
+        events: {
+          change: () => {
+            if (props.setBoardFen && api) {
+              props.setBoardFen(api.getFen());
+            }
+          },
+        },
       });
     } else {
       const chessgroundApi = Chessground(boardRef.current, {
         ...props,
+        addDimensionsCssVarsTo: boardRef.current,
+        events: {
+          change: () => {
+            if (props.setBoardFen && api) {
+              props.setBoardFen(chessgroundApi.getFen());
+            }
+          },
+        },
       });
       setApi(chessgroundApi);
     }
   }, [api, props, boardRef]);
+
+  useEffect(() => {
+    api?.set({
+      ...props,
+      events: {
+        change: () => {
+          if (props.setBoardFen && api) {
+            props.setBoardFen(api.getFen());
+          }
+        },
+      },
+    });
+  }, [api, props]);
 
   return (
     <div className="flex items-center gap-4 ">

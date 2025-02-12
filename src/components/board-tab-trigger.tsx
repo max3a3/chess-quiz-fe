@@ -42,20 +42,20 @@ const BoardTabTrigger = ({
 
   return (
     <div
-      key={tab.id}
+      key={tab.value}
       className={cn(
         "flex justify-between items-center gap-4 pl-3 pr-1 min-w-36 h-10 border rounded-md cursor-pointer transition-colors hover:bg-slate-100",
         selected && "bg-slate-100"
       )}
       onPointerDown={(e) => {
         if (e.button === 0) {
-          selectTab(tab.id);
+          selectTab(tab.value);
         }
       }}
       onDoubleClick={handleDoubleClick}
       onAuxClick={(e) => {
         if (e.button === 1) {
-          closeTab(tab.id);
+          closeTab(tab.value);
         }
       }}
     >
@@ -64,7 +64,7 @@ const BoardTabTrigger = ({
         contentEditable={renaming}
         suppressContentEditableWarning
         onBlur={(e) => {
-          renameTab(tab.id, e.currentTarget.textContent || "");
+          renameTab(tab.value, e.currentTarget.textContent || "");
         }}
         onKeyDown={(e) => {
           if (e.key === "Enter") {
@@ -74,10 +74,10 @@ const BoardTabTrigger = ({
         }}
         className="font-medium text-sm focus:outline-none"
       >
-        {tab.title}
+        {tab.name}
       </span>
       <button
-        onClick={() => closeTab(tab.id)}
+        onClick={() => closeTab(tab.value)}
         className="p-2 rounded-md transition-colors hover:bg-slate-200"
       >
         <XIcon className="size-3.5" />

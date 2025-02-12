@@ -21,7 +21,7 @@ function HomePage() {
   useEffect(() => {
     if (tabs.length === 0) {
       createTab({
-        tab: { title: "New Game" },
+        tab: { name: "New Tab", type: "play" },
         setTabs,
         setActiveTab,
       });
@@ -29,37 +29,37 @@ function HomePage() {
   }, [tabs]);
 
   const closeTab = useCallback(
-    (id: string) => {
-      if (id === activeTab) {
-        const index = tabs.findIndex((tab) => tab.id === id);
+    (value: string) => {
+      if (value === activeTab) {
+        const index = tabs.findIndex((tab) => tab.value === value);
         if (tabs.length > 1) {
           if (index === tabs.length - 1) {
-            setActiveTab(tabs[index - 1].id);
+            setActiveTab(tabs[index - 1].value);
           } else {
-            setActiveTab(tabs[index + 1].id);
+            setActiveTab(tabs[index + 1].value);
           }
         } else {
           setActiveTab(null);
         }
       }
-      setTabs((prev) => prev.filter((tab) => tab.id !== id));
+      setTabs((prev) => prev.filter((tab) => tab.value !== value));
     },
     [tabs, activeTab, setTabs, setActiveTab]
   );
 
   const selectTab = useCallback(
-    (id: string) => {
-      setActiveTab(id);
+    (value: string) => {
+      setActiveTab(value);
     },
     [setActiveTab]
   );
 
   const renameTab = useCallback(
-    (id: string, title: string) => {
+    (value: string, name: string) => {
       setTabs((prev) =>
         prev.map((tab) => {
-          if (tab.id === id) {
-            return { ...tab, title };
+          if (tab.value === value) {
+            return { ...tab, name };
           }
           return tab;
         })
@@ -73,9 +73,9 @@ function HomePage() {
       <div className="flex gap-2">
         {tabs.map((tab) => (
           <BoardTabTrigger
-            key={tab.id}
+            key={tab.value}
             tab={tab}
-            selected={tab.id === activeTab}
+            selected={tab.value === activeTab}
             selectTab={selectTab}
             renameTab={renameTab}
             closeTab={closeTab}
@@ -85,7 +85,8 @@ function HomePage() {
           onClick={() =>
             createTab({
               tab: {
-                title: "New Game",
+                name: "New Game",
+                type: "play",
               },
               setTabs,
               setActiveTab,
@@ -98,7 +99,7 @@ function HomePage() {
       </div>
       <div>
         {tabs.map((tab) => (
-          <TabsContent key={tab.id} value={tab.id}>
+          <TabsContent key={tab.value} value={tab.value}>
             <TabSwitch tab={tab} />
           </TabsContent>
         ))}
@@ -109,7 +110,7 @@ function HomePage() {
 
 function TabSwitch({ tab }: { tab: Tab }) {
   return (
-    <ChessStateProvider id={tab.id}>
+    <ChessStateProvider id={tab.value}>
       <BoardSection />
     </ChessStateProvider>
   );

@@ -1,21 +1,23 @@
+import { z } from "zod";
 import { atomWithStorage, createJSONStorage } from "jotai/utils";
 
-import { genID } from "@/lib/utils";
-import { Tab } from "@/utils/tabs";
+import { createZodStorage, genID } from "@/lib/utils";
+import { Tab, tabSchema } from "@/utils/tabs";
 
 const firstTab: Tab = {
-  id: genID(),
-  title: "New Game",
+  name: "New Tab",
+  value: genID(),
+  type: "play",
 };
 
 export const tabsAtom = atomWithStorage<Tab[]>(
   "tabs",
   [firstTab],
-  createJSONStorage(() => sessionStorage)
+  createZodStorage(z.array(tabSchema), sessionStorage)
 );
 
 export const activeTabAtom = atomWithStorage<string | null>(
   "activeTab",
-  firstTab.id,
+  firstTab.value,
   createJSONStorage(() => sessionStorage)
 );
