@@ -126,7 +126,7 @@ function TabSwitch({ tab }: { tab: Tab }) {
     ))
     .with("puzzles", () => (
       <ChessStateProvider id={tab.value}>
-        <Puzzles />
+        <Puzzles id={tab.value} />
       </ChessStateProvider>
     ))
     .exhaustive();

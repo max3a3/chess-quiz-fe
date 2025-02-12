@@ -502,7 +502,6 @@ function makeMove({
   if (!pos) return;
 
   //이동을 SAN(알기 쉬운 체스 기보 표기법)으로 변환
-  console.log(moveNode.fen);
   const san = makeSan(pos, move);
   if (san === "--") return; // invalid move
   pos.play(move);

@@ -1,0 +1,27 @@
+[
+  {
+    "fen": "rnbqkb1r/pppp1ppp/5n2/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3",
+    "moves": ["e1h5"],
+    "rating": 700
+  },
+  {
+    "fen": "r1bqkb1r/pppp1ppp/2n5/4p3/1P2P3/5N2/P1PP1PPP/RNBQKB1R w KQkq - 2 4",
+    "moves": ["f1b5"],
+    "rating": 700
+  },
+  {
+    "fen": "r1bqkbnr/ppp2ppp/8/3pp3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 0 4",
+    "moves": ["g1f3", "b8c6"],
+    "rating": 700
+  },
+  {
+    "fen": "rnbqkbnr/pppp1ppp/8/4p3/4P3/3P4/PPP2PPP/RNBQKBNR w KQkq - 0 3",
+    "moves": ["Nf3", "Nc6"],
+    "rating": 700
+  },
+  {
+    "fen": "rnb1kbnr/pppp1ppp/8/4q3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 3 3",
+    "moves": ["f3e5", "e5e4", "d1e2"],
+    "rating": 700
+  }
+]
