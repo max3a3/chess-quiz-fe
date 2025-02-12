@@ -9,7 +9,7 @@ import ChessBoard from "@/components/chess-board";
 import ChessDashboard from "@/components/chess-dashboard";
 import { ChessStateContext } from "@/provider/chess-state-context";
 
-const BoardSection = () => {
+const BoardGame = () => {
   const store = useContext(ChessStateContext)!;
 
   const root = useStore(store, (s) => s.root);
@@ -135,4 +135,4 @@ const BoardSection = () => {
   );
 };
 
-export default BoardSection;
+export default BoardGame;

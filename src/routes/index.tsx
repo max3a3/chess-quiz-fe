@@ -2,13 +2,16 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useAtom } from "jotai/react";
 import { useCallback, useEffect } from "react";
 import { PlusIcon } from "lucide-react";
+import { match } from "ts-pattern";
 
 import { activeTabAtom, tabsAtom } from "@/state/atoms";
 import { createTab, Tab } from "@/utils/tabs";
 import BoardTabTrigger from "@/components/board-tab-trigger";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import ChessStateProvider from "@/provider/chess-state-context";
-import BoardSection from "@/components/board-section";
+import NewTabHome from "@/components/tabs/new-tab-home";
+import BoardGame from "@/components/tabs/board-game";
+import Puzzles from "@/components/tabs/puzzles";
 
 export const Route = createFileRoute("/")({
   component: HomePage,
@@ -21,12 +24,12 @@ function HomePage() {
   useEffect(() => {
     if (tabs.length === 0) {
       createTab({
-        tab: { name: "New Tab", type: "play" },
+        tab: { name: "New Tab", type: "new" },
         setTabs,
         setActiveTab,
       });
     }
-  }, [tabs]);
+  }, [tabs, setActiveTab, setTabs]);
 
   const closeTab = useCallback(
     (value: string) => {
@@ -69,7 +72,12 @@ function HomePage() {
   );
 
   return (
-    <Tabs value={activeTab || undefined} className="space-y-3 p-4">
+    <Tabs
+      value={activeTab || undefined}
+      onValueChange={(value) => setActiveTab(value)}
+      onChange={() => console.log(123)}
+      className="space-y-3 p-4"
+    >
       <div className="flex gap-2">
         {tabs.map((tab) => (
           <BoardTabTrigger
@@ -85,8 +93,8 @@ function HomePage() {
           onClick={() =>
             createTab({
               tab: {
-                name: "New Game",
-                type: "play",
+                name: "New Tab",
+                type: "new",
               },
               setTabs,
               setActiveTab,
@@ -109,9 +117,17 @@ function HomePage() {
 }
 
 function TabSwitch({ tab }: { tab: Tab }) {
-  return (
-    <ChessStateProvider id={tab.value}>
-      <BoardSection />
-    </ChessStateProvider>
-  );
+  return match(tab.type)
+    .with("new", () => <NewTabHome id={tab.value} />)
+    .with("play", () => (
+      <ChessStateProvider id={tab.value}>
+        <BoardGame />
+      </ChessStateProvider>
+    ))
+    .with("puzzles", () => (
+      <ChessStateProvider id={tab.value}>
+        <Puzzles />
+      </ChessStateProvider>
+    ))
+    .exhaustive();
 }

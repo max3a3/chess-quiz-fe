@@ -7,7 +7,7 @@ import { Tab, tabSchema } from "@/utils/tabs";
 const firstTab: Tab = {
   name: "New Tab",
   value: genID(),
-  type: "play",
+  type: "new",
 };
 
 export const tabsAtom = atomWithStorage<Tab[]>(

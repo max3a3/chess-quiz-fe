@@ -5,7 +5,7 @@ import { genID } from "@/lib/utils";
 export const tabSchema = z.object({
   name: z.string(),
   value: z.string(),
-  type: z.enum(["new", "play", "analysis", "puzzles"]),
+  type: z.enum(["new", "play", "puzzles"]),
   gameNumber: z.number().nullish(),
 });
 
@@ -22,6 +22,26 @@ export function createTab({
 }) {
   const id = genID();
 
-  setTabs((tabs) => [...tabs, { ...tab, value: id }]);
+  setTabs((prev) => {
+    if (
+      prev.length === 0 ||
+      (prev.length === 1 && prev[0].type === "new" && tab.type !== "new")
+    ) {
+      return [
+        {
+          ...tab,
+          value: id,
+        },
+      ];
+    }
+    return [
+      ...prev,
+      {
+        ...tab,
+        value: id,
+      },
+    ];
+  });
   setActiveTab(id);
+  return id;
 }
