@@ -6,7 +6,7 @@ import { match } from "ts-pattern";
 
 import { activeTabAtom, tabsAtom } from "@/state/atoms";
 import { createTab, Tab } from "@/utils/tabs";
-import BoardTabTrigger from "@/components/board-tab-trigger";
+import BoardTabTrigger from "@/components/tabs/board-tab-trigger";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import ChessStateProvider from "@/provider/chess-state-context";
 import NewTabHome from "@/components/tabs/new-tab-home";

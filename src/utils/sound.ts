@@ -15,7 +15,7 @@ export function playSound(capture: boolean, check: boolean) {
     type = "Check";
   }
 
-  const audio = new Audio(`/sound/sfx/${type}.mp3`);
+  const audio = new Audio(`/sound/robot/${type}.mp3`);
   audio.volume = 1;
   audio.play();
 }

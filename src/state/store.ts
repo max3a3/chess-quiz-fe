@@ -7,7 +7,7 @@ import { makeSan, parseSan } from "chessops/san";
 import { DrawShape } from "chessground/draw";
 
 import { playSound } from "@/utils/sound";
-import { parseSanOrUci, positionFromFen } from "@/utils/chessops";
+import { getPGN, parseSanOrUci, positionFromFen } from "@/utils/chessops";
 import {
   createNode,
   defaultTree,
@@ -57,6 +57,7 @@ interface ChessStoreState {
   deleteMove: (path?: number[]) => void;
   promoteVariation: (path: number[]) => void;
   promoteToMainline: (path: number[]) => void;
+  copyVariationPgn: (path: number[]) => void;
 
   setStart: (start: number[]) => void;
 
@@ -333,6 +334,18 @@ export const createChessStore = (id?: string, initialTree?: TreeState) => {
           while (!promoteVariation(state, path)) {}
         })
       ),
+    copyVariationPgn: (path) => {
+      const { root } = get();
+      const pgn = getPGN(root, {
+        headers: null,
+        comments: false,
+        extraMarkups: false,
+        glyphs: true,
+        variations: false,
+        path,
+      });
+      navigator.clipboard.writeText(pgn);
+    },
 
     setStart: (start) =>
       set(

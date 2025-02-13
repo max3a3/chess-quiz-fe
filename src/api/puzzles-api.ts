@@ -1,6 +1,8 @@
-import { Puzzle } from "@/utils/puzzles";
-
-export const getPuzzle = async (): Promise<Omit<Puzzle, "completion">> => {
+export const getPuzzle = async (): Promise<{
+  fen: string;
+  moves: string;
+  rating: number;
+}> => {
   try {
     const response = await fetch("/data/puzzles.json");
     if (!response.ok) {

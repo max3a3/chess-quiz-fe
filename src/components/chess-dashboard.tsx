@@ -1,8 +1,7 @@
 import { useContext } from "react";
 import { useStore } from "zustand";
 
-import MoveCell from "@/components/move-cell";
-import MoveControls from "@/components/move-controls";
+import MoveCell from "@/components/common/move-cell";
 import { ChessStateContext } from "@/provider/chess-state-context";
 
 const ChessDashboard = () => {
@@ -13,7 +12,6 @@ const ChessDashboard = () => {
       <div className="flex-1 p-4 border rounded-md">
         <div className="flex flex-wrap overflow-hidden"></div>
       </div>
-      <MoveControls />
     </div>
   );
 };

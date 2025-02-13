@@ -72,3 +72,13 @@ function tabValue<
     }
   );
 }
+
+export const jumpToNextPuzzleAtom = atomWithStorage<boolean>(
+  "puzzle-jump-immediately",
+  true
+);
+
+export const moveNotationTypeAtom = atomWithStorage<"letters" | "symbols">(
+  "letters",
+  "symbols"
+);

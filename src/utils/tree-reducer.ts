@@ -4,6 +4,8 @@ import { INITIAL_FEN } from "chessops/fen";
 
 import { positionFromFen } from "@/utils/chessops";
 import { Outcome } from "@/utils/types";
+import { Annotation } from "@/utils/annotation";
+import { Score } from "@/utils/score";
 
 export interface TreeState {
   root: TreeNode;
@@ -20,6 +22,10 @@ export interface TreeNode {
   depth: number | null;
   halfMoves: number;
   shapes: DrawShape[];
+  score: Score | null;
+  annotations: Annotation[];
+  comment: string;
+  clock?: number;
 }
 
 export interface ListNode {
@@ -30,9 +36,24 @@ export interface ListNode {
 export interface GameHeaders {
   id: number;
   fen: string;
+  event: string;
+  site: string;
+  date?: string | null;
+  time?: string | null;
+  round?: string | null;
+  white: string;
+  white_elo?: number | null;
+  black: string;
+  black_elo?: number | null;
   result: Outcome;
-
+  time_control?: string | null;
+  white_time_control?: string | null;
+  black_time_control?: string | null;
+  eco?: string | null;
+  variant?: string | null;
+  // Repertoire headers
   start?: number[];
+  orientation?: "white" | "black";
 }
 
 export function* treeIterator(node: TreeNode): Generator<ListNode> {
@@ -81,11 +102,18 @@ export function defaultTree(fen?: string): TreeState {
       depth: null,
       halfMoves: pos?.turn === "black" ? 1 : 0,
       shapes: [],
+      score: null,
+      annotations: [],
+      comment: "",
     },
     headers: {
       id: 0,
       fen: fen ?? INITIAL_FEN,
+      black: "",
+      white: "",
       result: "*",
+      event: "",
+      site: "",
     },
   };
 }
@@ -95,6 +123,7 @@ export function createNode({
   move,
   san,
   halfMoves,
+  clock,
 }: {
   move: Move;
   san: string;
@@ -110,6 +139,10 @@ export function createNode({
     depth: null,
     halfMoves,
     shapes: [],
+    score: null,
+    clock: clock ? clock / 1000 : undefined,
+    annotations: [],
+    comment: "",
   };
 }
 

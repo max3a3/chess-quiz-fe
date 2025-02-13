@@ -6,13 +6,23 @@ import { parseUci } from "chessops";
 
 import { ChessStateContext } from "@/provider/chess-state-context";
 import { Completion, Puzzle } from "@/utils/puzzles";
-import { activeTabAtom, currentPuzzleAtom, tabsAtom } from "@/state/atoms";
+import {
+  activeTabAtom,
+  currentPuzzleAtom,
+  jumpToNextPuzzleAtom,
+  tabsAtom,
+} from "@/state/atoms";
 import { positionFromFen } from "@/utils/chessops";
 import PuzzleBoard from "@/components/puzzles/puzzle-board";
 import { getPuzzle } from "@/api/puzzles-api";
 import { Button } from "@/components/ui/button";
-import { PlusIcon } from "lucide-react";
+import { PlusIcon, XIcon } from "lucide-react";
 import ActionTooltip from "@/components/ui/action-tooltip";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import PuzzleHistory from "@/components/puzzles/puzzle-history";
+import GameNotation from "@/components/common/game-notation";
+import MoveControls from "@/components/common/move-controls";
 
 const Puzzles = ({ id }: { id: string }) => {
   const store = useContext(ChessStateContext)!;
@@ -25,6 +35,8 @@ const Puzzles = ({ id }: { id: string }) => {
     []
   );
   const [currentPuzzle, setCurrentPuzzle] = useAtom(currentPuzzleAtom);
+  const [jumpToNextPuzzleImmediately, setJumpToNextPuzzleImmediately] =
+    useAtom(jumpToNextPuzzleAtom);
 
   const wonPuzzles = puzzles.filter(
     (puzzle) => puzzle.completion === "correct"
@@ -42,6 +54,7 @@ const Puzzles = ({ id }: { id: string }) => {
     getPuzzle().then((puzzle) => {
       const newPuzzle: Puzzle = {
         ...puzzle,
+        moves: puzzle.moves.split(" "),
         completion: "incomplete",
       };
       setPuzzles((puzzles) => {
@@ -86,20 +99,88 @@ const Puzzles = ({ id }: { id: string }) => {
     <section>
       <div className="flex gap-4 p-2">
         <PuzzleBoard
+          key={currentPuzzle}
           puzzles={puzzles}
           currentPuzzle={currentPuzzle}
           changeCompletion={changeCompletion}
           generatePuzzle={generatePuzzle}
         />
-        <div className="flex gap-2 flex-1">
-          <ActionTooltip label="New Puzzle">
-            <Button onClick={generatePuzzle} size="icon">
-              <PlusIcon />
+        <div className="space-y-2 flex-1">
+          <div className="space-y-3 p-4 bg-primary rounded-md">
+            <div className="flex justify-between items-center">
+              {turnToMove && (
+                <h4 className="font-semibold text-2xl text-muted">
+                  {turnToMove === "white" ? "Black " : "White "}
+                  To Move
+                </h4>
+              )}
+              <div className="flex items-center gap-1">
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    checked={jumpToNextPuzzleImmediately}
+                    onCheckedChange={(checked) =>
+                      setJumpToNextPuzzleImmediately(checked)
+                    }
+                    id="jump-to-next-puzzle-immediately"
+                    className="data-[state=checked]:bg-slate-700"
+                  />
+                  <Label
+                    htmlFor="jump-to-next-puzzle-immediately"
+                    className="text-muted"
+                  >
+                    Jump to next puzzle immediately
+                  </Label>
+                </div>
+                <ActionTooltip label="New Puzzle">
+                  <Button
+                    variant="default"
+                    onClick={generatePuzzle}
+                    size="icon"
+                  >
+                    <PlusIcon className="text-muted" />
+                  </Button>
+                </ActionTooltip>
+                <ActionTooltip label="Clear Session">
+                  <Button
+                    variant="default"
+                    onClick={() => {
+                      setPuzzles([]);
+                      reset();
+                    }}
+                    size="icon"
+                  >
+                    <XIcon className="text-muted" />
+                  </Button>
+                </ActionTooltip>
+              </div>
+            </div>
+            <Button
+              variant="secondary"
+              disabled={puzzles.length === 0}
+              onClick={viewSolution}
+            >
+              View Solution
             </Button>
-          </ActionTooltip>
-          <Button disabled={puzzles.length === 0} onClick={viewSolution}>
-            View Solution
-          </Button>
+          </div>
+          <div className="space-y-2">
+            <div className="p-4 bg-primary rounded-md">
+              <PuzzleHistory
+                histories={puzzles.map((p) => ({
+                  ...p,
+                  label: p.rating.toString(),
+                }))}
+                current={currentPuzzle}
+                onSelect={(i) => {
+                  setCurrentPuzzle(i);
+                  setPuzzle(puzzles[i]);
+                }}
+              />
+            </div>
+            <div className="space-y-2">
+              <GameNotation />
+              <MoveControls readOnly />
+            </div>
+          </div>
         </div>
       </div>
     </section>

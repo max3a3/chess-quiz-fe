@@ -11,6 +11,8 @@ import { ChessStateContext } from "@/provider/chess-state-context";
 import { Completion, Puzzle } from "@/utils/puzzles";
 import { getNodeAtPath, treeIteratorMainLine } from "@/utils/tree-reducer";
 import { positionFromFen } from "@/utils/chessops";
+import { useAtom } from "jotai/react";
+import { jumpToNextPuzzleAtom } from "@/state/atoms";
 
 interface PuzzleBoardProps {
   puzzles: Puzzle[];
@@ -31,6 +33,7 @@ const PuzzleBoard = ({
   const makeMove = useStore(store, (s) => s.makeMove);
   const makeMoves = useStore(store, (s) => s.makeMoves);
   const reset = useForceUpdate();
+  const [jumpToNextPuzzleImmediately] = useAtom(jumpToNextPuzzleAtom);
 
   const currentNode = getNodeAtPath(root, position);
 
@@ -61,7 +64,7 @@ const PuzzleBoard = ({
       : "white"
     : "white";
   const [pendingMove, setPendingMove] = useState<NormalMove | null>(null);
-  const dests = chessgroundDests(pos!);
+  const dests = pos ? chessgroundDests(pos) : new Map();
   const turn = pos?.turn || "white";
 
   function checkMove(move: Move) {
@@ -82,7 +85,7 @@ const PuzzleBoard = ({
         setEnded(false);
 
         //퍼즐 즉시 생성 유무
-        if (false) {
+        if (jumpToNextPuzzleImmediately) {
           generatePuzzle();
         }
       }
@@ -107,8 +110,6 @@ const PuzzleBoard = ({
     }
     reset();
   }
-
-  console.log(puzzle);
 
   return (
     <div>
@@ -141,6 +142,12 @@ const PuzzleBoard = ({
               }
             },
           },
+        }}
+        draggable={{
+          enabled: true,
+        }}
+        selectable={{
+          enabled: true,
         }}
         lastMove={
           currentNode.move ? chessgroundMove(currentNode.move) : undefined
