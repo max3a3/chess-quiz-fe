@@ -4,6 +4,7 @@ import { produce } from "immer";
 import { Move } from "chessops";
 import { INITIAL_FEN, makeFen } from "chessops/fen";
 import { makeSan } from "chessops/san";
+import { devtools } from "zustand/middleware";
 
 import { playSound } from "@/utils/sound";
 import { positionFromFen } from "@/utils/chessops";
@@ -100,21 +101,21 @@ export const createChessStore = (id?: string) => {
       const san = nodes[moveIndex + 1].san;
       if (!san) return;
       playSound(san.includes("x"), san.includes("+"));
-      set(
+     return set(
         produce((state) => {
           state.moveIndex = moveIndex + 1;
-        })
+        },undefined,"GoToNext")
       );
     },
   });
 
   if (id) {
-    return createStore<ChessStoreState>()(
+    return createStore<ChessStoreState>()(devtools(
       persist(stateCreator, {
         name: id,
         storage: createJSONStorage(() => sessionStorage),
       })
-    );
+    ));
   }
   return createStore<ChessStoreState>()(stateCreator);
 };
