@@ -5,6 +5,7 @@ import { isNormal, Move } from "chessops";
 import { INITIAL_FEN, makeFen } from "chessops/fen";
 import { makeSan, parseSan } from "chessops/san";
 import { DrawShape } from "chessground/draw";
+import { devtools } from "zustand/middleware";
 
 import { playSound } from "@/utils/sound";
 import { getPGN, parseSanOrUci, positionFromFen } from "@/utils/chessops";
@@ -120,7 +121,7 @@ export const createChessStore = (id?: string, initialTree?: TreeState) => {
           };
         }
         return state;
-      }),
+      },undefined,"goToNext"),
 
     goToPrevious: () =>
       set((state) => ({ ...state, position: state.position.slice(0, -1) })),
@@ -386,11 +387,11 @@ export const createChessStore = (id?: string, initialTree?: TreeState) => {
   });
 
   if (id) {
-    return createStore<ChessStoreState>()(
+    return createStore<ChessStoreState>()(devtools(
       persist(stateCreator, {
         name: id,
         storage: createJSONStorage(() => sessionStorage),
-      })
+      }))
     );
   }
   return createStore<ChessStoreState>()(stateCreator);
