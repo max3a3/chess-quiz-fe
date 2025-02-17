@@ -1,17 +1,12 @@
 import { useContext } from "react";
 import { useStore } from "zustand";
 import { useSessionStorage } from "usehooks-ts";
-import { useAtom, useSetAtom } from "jotai/react";
+import { useAtom } from "jotai/react";
 import { parseUci } from "chessops";
 
 import { ChessStateContext } from "@/provider/chess-state-context";
 import { Completion, Puzzle } from "@/utils/puzzles";
-import {
-  activeTabAtom,
-  currentPuzzleAtom,
-  jumpToNextPuzzleAtom,
-  tabsAtom,
-} from "@/state/atoms";
+import { currentPuzzleAtom, jumpToNextPuzzleAtom } from "@/state/atoms";
 import { positionFromFen } from "@/utils/chessops";
 import PuzzleBoard from "@/components/puzzles/puzzle-board";
 import { getPuzzle } from "@/api/puzzles-api";
@@ -37,13 +32,6 @@ const Puzzles = ({ id }: { id: string }) => {
   const [currentPuzzle, setCurrentPuzzle] = useAtom(currentPuzzleAtom);
   const [jumpToNextPuzzleImmediately, setJumpToNextPuzzleImmediately] =
     useAtom(jumpToNextPuzzleAtom);
-
-  const wonPuzzles = puzzles.filter(
-    (puzzle) => puzzle.completion === "correct"
-  );
-  const lostPuzzles = puzzles.filter(
-    (puzzle) => puzzle.completion === "incorrect"
-  );
 
   function setPuzzle(puzzle: { fen: string; moves: string[] }) {
     setFen(puzzle.fen);
@@ -75,6 +63,8 @@ const Puzzles = ({ id }: { id: string }) => {
       makeMove({
         payload: parseUci(curPuzzle.moves[i])!,
         mainline: true,
+        // Black 퀴즈일 때, White 퀴즈일 때 구분 필요. 지금은 Black
+        completion: i % 2 === 1 ? "correct" : undefined,
       });
       await new Promise((r) => setTimeout(r, 500));
     }
@@ -86,9 +76,6 @@ const Puzzles = ({ id }: { id: string }) => {
       return [...puzzles];
     });
   }
-
-  const setTabs = useSetAtom(tabsAtom);
-  const setActiveTab = useSetAtom(activeTabAtom);
 
   const turnToMove =
     puzzles[currentPuzzle] !== undefined
@@ -105,7 +92,7 @@ const Puzzles = ({ id }: { id: string }) => {
           changeCompletion={changeCompletion}
           generatePuzzle={generatePuzzle}
         />
-        <div className="space-y-2 flex-1">
+        <div className="flex flex-col space-y-2 flex-1">
           <div className="space-y-3 p-4 bg-primary rounded-md">
             <div className="flex justify-between items-center">
               {turnToMove && (
@@ -162,7 +149,7 @@ const Puzzles = ({ id }: { id: string }) => {
               View Solution
             </Button>
           </div>
-          <div className="space-y-2">
+          <div className="flex flex-col space-y-2 h-full">
             <div className="p-4 bg-primary rounded-md">
               <PuzzleHistory
                 histories={puzzles.map((p) => ({
@@ -176,9 +163,14 @@ const Puzzles = ({ id }: { id: string }) => {
                 }}
               />
             </div>
-            <div className="space-y-2">
-              <GameNotation />
-              <MoveControls readOnly />
+            <div className="flex flex-1">
+              <div className="flex flex-col space-y-2 flex-1">
+                <div className="flex-1">
+                  <GameNotation />
+                </div>
+                <MoveControls readOnly />
+              </div>
+              <div className="w-1/4" />
             </div>
           </div>
         </div>

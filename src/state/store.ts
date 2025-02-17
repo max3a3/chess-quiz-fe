@@ -18,6 +18,7 @@ import {
   TreeState,
 } from "@/utils/tree-reducer";
 import { isPrefix } from "@/utils/misc";
+import { NodeCompletion } from "@/utils/puzzles";
 
 interface ChessStoreState {
   root: TreeNode;
@@ -45,6 +46,7 @@ interface ChessStoreState {
     mainline?: boolean;
     clock?: number;
     changeHeaders?: boolean;
+    completion?: NodeCompletion;
   }) => void;
 
   appendMove: (args: { payload: Move; clock?: number }) => void;
@@ -53,6 +55,7 @@ interface ChessStoreState {
     payload: string[];
     mainline?: boolean;
     changeHeaders?: boolean;
+    puzzleMoves?: boolean;
   }) => void;
   deleteMove: (path?: number[]) => void;
   promoteVariation: (path: number[]) => void;
@@ -131,6 +134,7 @@ export const createChessStore = (id?: string, initialTree?: TreeState) => {
       mainline,
       clock,
       changeHeaders = true,
+      completion,
     }) => {
       set(
         produce((state) => {
@@ -151,6 +155,7 @@ export const createChessStore = (id?: string, initialTree?: TreeState) => {
             changeHeaders,
             mainline,
             clock,
+            completion,
           });
         })
       );
@@ -164,7 +169,12 @@ export const createChessStore = (id?: string, initialTree?: TreeState) => {
         })
       ),
 
-    makeMoves: ({ payload, mainline, changeHeaders = true }) =>
+    makeMoves: ({
+      payload,
+      mainline,
+      changeHeaders = true,
+      puzzleMoves = false,
+    }) =>
       set(
         produce((state) => {
           state.dirty = true;
@@ -182,6 +192,7 @@ export const createChessStore = (id?: string, initialTree?: TreeState) => {
               mainline,
               sound: i === payload.length - 1,
               changeHeaders,
+              completion: puzzleMoves && i === 0 ? "correct" : undefined,
             });
           }
         })
@@ -493,6 +504,7 @@ function makeMove({
   mainline = false,
   clock,
   sound = true,
+  completion,
 }: {
   state: TreeState;
   move: Move;
@@ -502,6 +514,7 @@ function makeMove({
   mainline?: boolean;
   clock?: number;
   sound?: boolean;
+  completion?: NodeCompletion;
 }) {
   // 현재 적용할 노드를 찾기
   const mainLine = Array.from(treeIteratorMainLine(state.root));
@@ -561,6 +574,7 @@ function makeMove({
       san,
       halfMoves: moveNode.halfMoves + 1,
       clock,
+      completion,
     });
     if (mainline) {
       //mainline인 경우에는 제일 앞에 추가

@@ -6,6 +6,7 @@ import { positionFromFen } from "@/utils/chessops";
 import { Outcome } from "@/utils/types";
 import { Annotation } from "@/utils/annotation";
 import { Score } from "@/utils/score";
+import { NodeCompletion } from "@/utils/puzzles";
 
 export interface TreeState {
   root: TreeNode;
@@ -25,6 +26,7 @@ export interface TreeNode {
   score: Score | null;
   annotations: Annotation[];
   comment: string;
+  completion?: NodeCompletion;
   clock?: number;
 }
 
@@ -124,12 +126,16 @@ export function createNode({
   san,
   halfMoves,
   clock,
+  comment = "",
+  completion,
 }: {
   move: Move;
   san: string;
   fen: string;
   halfMoves: number;
   clock?: number;
+  comment?: string;
+  completion?: NodeCompletion;
 }): TreeNode {
   return {
     fen,
@@ -142,7 +148,8 @@ export function createNode({
     score: null,
     clock: clock ? clock / 1000 : undefined,
     annotations: [],
-    comment: "",
+    comment,
+    completion,
   };
 }
 
