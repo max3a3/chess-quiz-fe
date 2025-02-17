@@ -1,6 +1,10 @@
 import { ANNOTATION_INFO, isBasicAnnotation } from "@/utils/annotation";
 import { formatScore } from "@/utils/score";
-import { GameHeaders, TreeNode } from "@/utils/tree-reducer";
+import {
+  GameHeaders,
+  treeIteratorMainLine,
+  TreeNode,
+} from "@/utils/tree-reducer";
 import { Chess, Move, parseUci, PositionError } from "chessops";
 import { FenError, INITIAL_FEN, parseFen } from "chessops/fen";
 import { parseSan } from "chessops/san";
@@ -251,4 +255,20 @@ export function getPGN(
     pgn += ` ${headers.result}`;
   }
   return pgn.trim();
+}
+
+export function getMovePairs(root: TreeNode): [TreeNode, TreeNode | null][] {
+  const movePairs: [TreeNode, TreeNode | null][] = [];
+  const iterator = treeIteratorMainLine(root);
+
+  iterator.next(); //루트 노드 건너뛰기
+
+  let whiteMove = iterator.next().value?.node;
+  while (whiteMove) {
+    let blackMove = iterator.next().value?.node || null;
+    movePairs.push([whiteMove, blackMove]);
+    whiteMove = iterator.next().value?.node;
+  }
+
+  return movePairs;
 }

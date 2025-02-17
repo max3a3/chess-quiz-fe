@@ -1,17 +1,17 @@
-import { useContext, useState } from "react";
+import { useContext } from "react";
 import { useStore } from "zustand";
 import { useForceUpdate } from "@toss/react";
 import { Chess, makeUci, Move, NormalMove, parseSquare } from "chessops";
 import { parseFen } from "chessops/fen";
 import { chessgroundDests, chessgroundMove } from "chessops/compat";
 import equal from "fast-deep-equal";
+import { useAtom } from "jotai/react";
 
 import ChessBoard from "@/components/chess-board";
 import { ChessStateContext } from "@/provider/chess-state-context";
 import { Completion, Puzzle } from "@/utils/puzzles";
 import { getNodeAtPath, treeIteratorMainLine } from "@/utils/tree-reducer";
 import { positionFromFen } from "@/utils/chessops";
-import { useAtom } from "jotai/react";
 import { jumpToNextPuzzleAtom } from "@/state/atoms";
 
 interface PuzzleBoardProps {
@@ -41,7 +41,6 @@ const PuzzleBoard = ({
   if (puzzles.length > 0) {
     puzzle = puzzles[currentPuzzle];
   }
-  const [ended, setEnded] = useState(false);
 
   const [pos] = positionFromFen(currentNode.fen);
 
@@ -63,7 +62,6 @@ const PuzzleBoard = ({
       ? "black"
       : "white"
     : "white";
-  const [pendingMove, setPendingMove] = useState<NormalMove | null>(null);
   const dests = pos ? chessgroundDests(pos) : new Map();
   const turn = pos?.turn || "white";
 
@@ -82,7 +80,6 @@ const PuzzleBoard = ({
         if (puzzle.completion !== "incorrect") {
           changeCompletion("correct");
         }
-        setEnded(false);
 
         //퍼즐 즉시 생성 유무
         if (jumpToNextPuzzleImmediately) {
@@ -95,6 +92,7 @@ const PuzzleBoard = ({
         payload: newMoves,
         mainline: true,
         changeHeaders: false,
+        puzzleMoves: true,
       });
     } else {
       //올바른 이동이 아닐 경우에는 노드 추가는 하되 position 변경은 하지 않음.
@@ -102,14 +100,21 @@ const PuzzleBoard = ({
         payload: move,
         changePosition: false,
         changeHeaders: false,
+        completion: "incorrect",
       });
-      if (!ended) {
-        changeCompletion("incorrect");
-      }
-      setEnded(true);
+      changeCompletion("incorrect");
     }
     reset();
   }
+
+  function practiceMove(move: Move) {
+    makeMove({
+      payload: move,
+      changeHeaders: false,
+    });
+  }
+
+  const isEnded = puzzle ? currentMove >= puzzle.moves.length : false;
 
   return (
     <div>
@@ -120,10 +125,10 @@ const PuzzleBoard = ({
         movable={{
           free: false,
           color:
-            puzzle &&
-            equal(position, Array(currentMove).fill(0)) &&
-            puzzle.completion === "incomplete"
-              ? turn
+            puzzle && (isEnded || equal(position, Array(currentMove).fill(0)))
+              ? //&& equal(position, Array(currentMove).fill(0))
+                //&& puzzle.completion === "incomplete"
+                turn
               : undefined,
           dests,
           events: {
@@ -131,15 +136,7 @@ const PuzzleBoard = ({
               const from = parseSquare(orig)!;
               const to = parseSquare(dest)!;
               const move: NormalMove = { from, to };
-              if (
-                pos?.board.get(from)?.role === "pawn" &&
-                ((dest[1] === "8" && turn === "white") ||
-                  (dest[1] === "1" && turn === "black"))
-              ) {
-                setPendingMove(move);
-              } else {
-                checkMove(move);
-              }
+              isEnded ? practiceMove(move) : checkMove(move);
             },
           },
         }}

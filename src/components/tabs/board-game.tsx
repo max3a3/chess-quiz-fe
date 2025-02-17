@@ -6,8 +6,9 @@ import { match } from "ts-pattern";
 
 import { positionFromFen } from "@/utils/chessops";
 import ChessBoard from "@/components/chess-board";
-import ChessDashboard from "@/components/chess-dashboard";
 import { ChessStateContext } from "@/provider/chess-state-context";
+import GameNotation from "@/components/common/game-notation";
+import MoveControls from "@/components/common/move-controls";
 
 const BoardGame = () => {
   const store = useContext(ChessStateContext)!;
@@ -129,7 +130,15 @@ const BoardGame = () => {
             },
           }}
         />
-        <ChessDashboard />
+        <div className="flex flex-1">
+          <div className="flex flex-col space-y-2 flex-1">
+            <div className="flex-1">
+              <GameNotation />
+            </div>
+            <MoveControls />
+          </div>
+          <div className="flex-1" />
+        </div>
       </div>
     </section>
   );
