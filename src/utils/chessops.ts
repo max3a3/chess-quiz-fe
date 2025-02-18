@@ -5,7 +5,15 @@ import {
   treeIteratorMainLine,
   TreeNode,
 } from "@/utils/tree-reducer";
-import { Chess, Move, parseUci, PositionError } from "chessops";
+import {
+  Chess,
+  Move,
+  parseUci,
+  PositionError,
+  Square,
+  squareFile,
+  squareRank,
+} from "chessops";
 import { FenError, INITIAL_FEN, parseFen } from "chessops/fen";
 import { parseSan } from "chessops/san";
 
@@ -38,6 +46,19 @@ export function parseSanOrUci(pos: Chess, sanOrUci: string): Move | null {
   }
 
   return null;
+}
+
+export function squareToCoordinates(
+  square: Square,
+  orientation: "white" | "black"
+) {
+  let file = squareFile(square);
+  let rank = squareRank(square) + 1;
+  if (orientation === "black") {
+    file = 9 - file;
+    rank = 9 - rank;
+  }
+  return { file, rank };
 }
 
 function headersToPGN(game: GameHeaders): string {

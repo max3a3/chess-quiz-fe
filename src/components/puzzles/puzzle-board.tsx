@@ -126,9 +126,7 @@ const PuzzleBoard = ({
           free: false,
           color:
             puzzle && (isEnded || equal(position, Array(currentMove).fill(0)))
-              ? //&& equal(position, Array(currentMove).fill(0))
-                //&& puzzle.completion === "incomplete"
-                turn
+              ? turn
               : undefined,
           dests,
           events: {

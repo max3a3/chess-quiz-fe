@@ -6,6 +6,7 @@ import CompleteMoveCell from "@/components/common/complete-move-cell";
 import { ChessStateContext } from "@/provider/chess-state-context";
 import { TreeNode } from "@/utils/tree-reducer";
 import { getMovePairs } from "@/utils/chessops";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const GameNotation = () => {
   const store = useContext(ChessStateContext)!;
@@ -29,7 +30,7 @@ const GameNotation = () => {
   }, [currentPosition]);
 
   return (
-    <div
+    <ScrollArea
       ref={scrollRef}
       tabIndex={0}
       onKeyDown={(event) => {
@@ -37,7 +38,7 @@ const GameNotation = () => {
           event.preventDefault();
         }
       }}
-      className="h-full max-h-[400px] bg-primary rounded-md overflow-auto scrollbar-hide"
+      className="h-[350px] bg-primary rounded-md"
     >
       {movePairs.map((movePair, i) => (
         <MovePair
@@ -49,7 +50,7 @@ const GameNotation = () => {
           targetRef={targetRef}
         />
       ))}
-    </div>
+    </ScrollArea>
   );
 };
 
