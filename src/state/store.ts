@@ -19,6 +19,8 @@ import {
   TreeState,
 } from "@/utils/tree-reducer";
 import { isPrefix } from "@/utils/misc";
+import { NodeCompletion } from "@/utils/puzzles";
+import { Annotation, ANNOTATION_INFO } from "@/utils/annotation";
 
 interface ChessStoreState {
   root: TreeNode;
@@ -46,6 +48,7 @@ interface ChessStoreState {
     mainline?: boolean;
     clock?: number;
     changeHeaders?: boolean;
+    completion?: NodeCompletion;
   }) => void;
 
   appendMove: (args: { payload: Move; clock?: number }) => void;
@@ -54,6 +57,7 @@ interface ChessStoreState {
     payload: string[];
     mainline?: boolean;
     changeHeaders?: boolean;
+    puzzleMoves?: boolean;
   }) => void;
   deleteMove: (path?: number[]) => void;
   promoteVariation: (path: number[]) => void;
@@ -62,6 +66,7 @@ interface ChessStoreState {
 
   setStart: (start: number[]) => void;
 
+  setAnnotation: (payload: Annotation, pos?: number[]) => void;
   setHeaders: (payload: GameHeaders) => void;
   setShapes: (shapes: DrawShape[]) => void;
 
@@ -132,6 +137,7 @@ export const createChessStore = (id?: string, initialTree?: TreeState) => {
       mainline,
       clock,
       changeHeaders = true,
+      completion,
     }) => {
       set(
         produce((state) => {
@@ -152,6 +158,7 @@ export const createChessStore = (id?: string, initialTree?: TreeState) => {
             changeHeaders,
             mainline,
             clock,
+            completion,
           });
         })
       );
@@ -165,7 +172,12 @@ export const createChessStore = (id?: string, initialTree?: TreeState) => {
         })
       ),
 
-    makeMoves: ({ payload, mainline, changeHeaders = true }) =>
+    makeMoves: ({
+      payload,
+      mainline,
+      changeHeaders = true,
+      puzzleMoves = false,
+    }) =>
       set(
         produce((state) => {
           state.dirty = true;
@@ -183,6 +195,7 @@ export const createChessStore = (id?: string, initialTree?: TreeState) => {
               mainline,
               sound: i === payload.length - 1,
               changeHeaders,
+              completion: puzzleMoves && i === 0 ? "correct" : undefined,
             });
           }
         })
@@ -355,6 +368,30 @@ export const createChessStore = (id?: string, initialTree?: TreeState) => {
           state.headers.start = start;
         })
       ),
+    setAnnotation: (payload, pos) =>
+      set(
+        produce((state) => {
+          state.dirty = true;
+          // DEFAULT: 현재 position node
+          const node = pos
+            ? getNodeAtPath(state.root, pos)
+            : getNodeAtPath(state.root, state.position);
+          if (node) {
+            if (node.annotations.includes(payload)) {
+              node.annotations = node.annotations.filter((a) => a !== payload);
+            } else {
+              const newAnnotations = node.annotations.filter(
+                (a) =>
+                  !ANNOTATION_INFO[a].group ||
+                  ANNOTATION_INFO[a].group !== ANNOTATION_INFO[payload].group
+              );
+              node.annotations = [...newAnnotations, payload].sort((a, b) =>
+                ANNOTATION_INFO[a].nag > ANNOTATION_INFO[b].nag ? 1 : -1
+              );
+            }
+          }
+        })
+      ),
     setHeaders: (headers) =>
       set(
         produce((state) => {
@@ -494,6 +531,7 @@ function makeMove({
   mainline = false,
   clock,
   sound = true,
+  completion,
 }: {
   state: TreeState;
   move: Move;
@@ -503,6 +541,7 @@ function makeMove({
   mainline?: boolean;
   clock?: number;
   sound?: boolean;
+  completion?: NodeCompletion;
 }) {
   // 현재 적용할 노드를 찾기
   const mainLine = Array.from(treeIteratorMainLine(state.root));
@@ -562,6 +601,7 @@ function makeMove({
       san,
       halfMoves: moveNode.halfMoves + 1,
       clock,
+      completion,
     });
     if (mainline) {
       //mainline인 경우에는 제일 앞에 추가

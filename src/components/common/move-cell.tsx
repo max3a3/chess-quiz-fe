@@ -1,7 +1,8 @@
-import { IconFlag } from "@tabler/icons-react";
+import { IconCheck, IconFlag, IconX } from "@tabler/icons-react";
 import { useAtom } from "jotai";
 import React from "react";
 import tinycolor from "tinycolor2";
+import { match } from "ts-pattern";
 
 import { moveNotationTypeAtom } from "@/state/atoms";
 import {
@@ -10,6 +11,8 @@ import {
   addPieceSymbol,
 } from "@/utils/annotation";
 import * as classes from "@/styles/move-cell.css";
+import { cn } from "@/lib/utils";
+import { NodeCompletion } from "@/utils/puzzles";
 
 interface MoveCellProps {
   annotations: Annotation[];
@@ -17,6 +20,8 @@ interface MoveCellProps {
   isCurrentVariation: boolean;
   move: string;
   onClick: () => void;
+  isSubline: boolean;
+  completion?: NodeCompletion;
 }
 
 function MoveCell(props: MoveCellProps) {
@@ -52,7 +57,10 @@ function MoveCell(props: MoveCellProps) {
   return (
     <button
       onClick={props.onClick}
-      className={classes.cell}
+      className={cn(
+        classes.cell,
+        props.isSubline ? "w-fit rounded-sm" : "w-full"
+      )}
       style={
         {
           "--color": baseLight,
@@ -61,9 +69,20 @@ function MoveCell(props: MoveCellProps) {
         } as React.CSSProperties
       }
     >
-      {props.isStart && <IconFlag style={{ marginRight: 5 }} size="0.875rem" />}
-      {moveNotationType === "symbols" ? addPieceSymbol(props.move) : props.move}
-      {props.annotations.join("")}
+      <span>
+        {props.isStart && (
+          <IconFlag style={{ marginRight: 5 }} size="0.875rem" />
+        )}
+        {moveNotationType === "symbols"
+          ? addPieceSymbol(props.move)
+          : props.move}
+        {props.annotations.join("")}
+      </span>
+      {props.completion &&
+        match(props.completion)
+          .with("correct", () => <IconCheck color="green" size={20} />)
+          .with("incorrect", () => <IconX color="red" size={20} />)
+          .exhaustive()}
     </button>
   );
 }

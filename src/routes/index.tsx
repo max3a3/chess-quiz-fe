@@ -75,7 +75,6 @@ function HomePage() {
     <Tabs
       value={activeTab || undefined}
       onValueChange={(value) => setActiveTab(value)}
-      onChange={() => console.log(123)}
       className="space-y-3 p-4"
     >
       <div className="flex gap-2">
@@ -107,7 +106,11 @@ function HomePage() {
       </div>
       <div>
         {tabs.map((tab) => (
-          <TabsContent key={tab.value} value={tab.value}>
+          <TabsContent
+            key={tab.value}
+            value={tab.value}
+            className="focus:outline-none"
+          >
             <TabSwitch tab={tab} />
           </TabsContent>
         ))}
