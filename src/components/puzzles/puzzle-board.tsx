@@ -1,6 +1,5 @@
 import { useContext, useState } from "react";
 import { useStore } from "zustand";
-import { useForceUpdate } from "@toss/react";
 import { Chess, makeUci, Move, NormalMove, parseSquare } from "chessops";
 import { parseFen } from "chessops/fen";
 import { chessgroundDests, chessgroundMove } from "chessops/compat";
@@ -32,7 +31,6 @@ const PuzzleBoard = ({
   const position = useStore(store, (s) => s.position);
   const makeMove = useStore(store, (s) => s.makeMove);
   const makeMoves = useStore(store, (s) => s.makeMoves);
-  const reset = useForceUpdate();
   const [jumpToNextPuzzleImmediately] = useAtom(jumpToNextPuzzleAtom);
 
   const currentNode = getNodeAtPath(root, position);
@@ -64,6 +62,10 @@ const PuzzleBoard = ({
       : "white"
     : "white";
   const [pendingMove, setPendingMove] = useState<NormalMove | null>(null);
+  const [updateTick, setUpdateTick] = useState(0);
+  const reset = ()=>{
+    setUpdateTick(updateTick + 1);
+  }
   const dests = pos ? chessgroundDests(pos) : new Map();
   const turn = pos?.turn || "white";
 
