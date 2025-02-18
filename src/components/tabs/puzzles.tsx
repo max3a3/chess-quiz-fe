@@ -2,7 +2,7 @@ import { useContext } from "react";
 import { useStore } from "zustand";
 import { useSessionStorage } from "usehooks-ts";
 import { useAtom } from "jotai/react";
-import { parseUci } from "chessops";
+import { parseSquare, parseUci } from "chessops";
 
 import { ChessStateContext } from "@/provider/chess-state-context";
 import { Completion, Puzzle } from "@/utils/puzzles";
@@ -18,6 +18,8 @@ import { Label } from "@/components/ui/label";
 import PuzzleHistory from "@/components/puzzles/puzzle-history";
 import GameNotation from "@/components/common/game-notation";
 import MoveControls from "@/components/common/move-controls";
+import { match } from "ts-pattern";
+import PuzzleAnnotation from "@/components/puzzles/puzzle-annotation";
 
 const Puzzles = ({ id }: { id: string }) => {
   const store = useContext(ChessStateContext)!;
@@ -25,6 +27,8 @@ const Puzzles = ({ id }: { id: string }) => {
   const goToStart = useStore(store, (s) => s.goToStart);
   const reset = useStore(store, (s) => s.reset);
   const makeMove = useStore(store, (s) => s.makeMove);
+  const currentNode = useStore(store, (s) => s.currentNode());
+
   const [puzzles, setPuzzles] = useSessionStorage<Puzzle[]>(
     `${id}-puzzles`,
     []
@@ -77,6 +81,15 @@ const Puzzles = ({ id }: { id: string }) => {
     });
   }
 
+  const square = match(currentNode)
+    .with({ san: "O-O" }, ({ halfMoves }) =>
+      parseSquare(halfMoves % 2 === 1 ? "g1" : "g8")
+    )
+    .with({ san: "O-O-O" }, ({ halfMoves }) =>
+      parseSquare(halfMoves % 2 === 1 ? "c1" : "c8")
+    )
+    .otherwise((node) => node.move?.to);
+
   const turnToMove =
     puzzles[currentPuzzle] !== undefined
       ? positionFromFen(puzzles[currentPuzzle]?.fen)[0]?.turn
@@ -85,13 +98,28 @@ const Puzzles = ({ id }: { id: string }) => {
   return (
     <section>
       <div className="flex gap-4 p-2">
-        <PuzzleBoard
-          key={currentPuzzle}
-          puzzles={puzzles}
-          currentPuzzle={currentPuzzle}
-          changeCompletion={changeCompletion}
-          generatePuzzle={generatePuzzle}
-        />
+        <div className="relative">
+          <PuzzleBoard
+            key={currentPuzzle}
+            puzzles={puzzles}
+            currentPuzzle={currentPuzzle}
+            changeCompletion={changeCompletion}
+            generatePuzzle={generatePuzzle}
+          />
+          {currentNode.completion &&
+            currentNode.move &&
+            square !== undefined && (
+              <div className="absolute inset-0 size-full">
+                <div className="relative size-full">
+                  <PuzzleAnnotation
+                    orientation="black"
+                    square={square}
+                    completion={currentNode.completion}
+                  />
+                </div>
+              </div>
+            )}
+        </div>
         <div className="flex flex-col space-y-2 flex-1">
           <div className="space-y-3 p-4 bg-primary rounded-md">
             <div className="flex justify-between items-center">
@@ -163,14 +191,14 @@ const Puzzles = ({ id }: { id: string }) => {
                 }}
               />
             </div>
-            <div className="flex flex-1">
+            <div className="flex gap-2 flex-1">
               <div className="flex flex-col space-y-2 flex-1">
                 <div className="flex-1">
                   <GameNotation />
                 </div>
                 <MoveControls readOnly />
               </div>
-              <div className="w-1/4" />
+              <div className="w-1/4"></div>
             </div>
           </div>
         </div>

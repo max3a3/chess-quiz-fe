@@ -19,6 +19,7 @@ import {
 } from "@/utils/tree-reducer";
 import { isPrefix } from "@/utils/misc";
 import { NodeCompletion } from "@/utils/puzzles";
+import { Annotation, ANNOTATION_INFO } from "@/utils/annotation";
 
 interface ChessStoreState {
   root: TreeNode;
@@ -64,6 +65,7 @@ interface ChessStoreState {
 
   setStart: (start: number[]) => void;
 
+  setAnnotation: (payload: Annotation, pos?: number[]) => void;
   setHeaders: (payload: GameHeaders) => void;
   setShapes: (shapes: DrawShape[]) => void;
 
@@ -363,6 +365,30 @@ export const createChessStore = (id?: string, initialTree?: TreeState) => {
         produce((state) => {
           state.dirty = true;
           state.headers.start = start;
+        })
+      ),
+    setAnnotation: (payload, pos) =>
+      set(
+        produce((state) => {
+          state.dirty = true;
+          // DEFAULT: 현재 position node
+          const node = pos
+            ? getNodeAtPath(state.root, pos)
+            : getNodeAtPath(state.root, state.position);
+          if (node) {
+            if (node.annotations.includes(payload)) {
+              node.annotations = node.annotations.filter((a) => a !== payload);
+            } else {
+              const newAnnotations = node.annotations.filter(
+                (a) =>
+                  !ANNOTATION_INFO[a].group ||
+                  ANNOTATION_INFO[a].group !== ANNOTATION_INFO[payload].group
+              );
+              node.annotations = [...newAnnotations, payload].sort((a, b) =>
+                ANNOTATION_INFO[a].nag > ANNOTATION_INFO[b].nag ? 1 : -1
+              );
+            }
+          }
         })
       ),
     setHeaders: (headers) =>
