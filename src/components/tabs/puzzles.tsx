@@ -1,25 +1,26 @@
-import { useContext } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useStore } from "zustand";
 import { useSessionStorage } from "usehooks-ts";
 import { useAtom } from "jotai/react";
 import { parseSquare, parseUci } from "chessops";
+import { PlusIcon, XIcon } from "lucide-react";
+import { match } from "ts-pattern";
 
 import { ChessStateContext } from "@/provider/chess-state-context";
-import { Completion, Puzzle } from "@/utils/puzzles";
+import { Completion, Puzzle, Status } from "@/utils/puzzles";
 import { currentPuzzleAtom, jumpToNextPuzzleAtom } from "@/state/atoms";
 import { positionFromFen } from "@/utils/chessops";
 import PuzzleBoard from "@/components/puzzles/puzzle-board";
 import { getPuzzle } from "@/api/puzzles-api";
 import { Button } from "@/components/ui/button";
-import { PlusIcon, XIcon } from "lucide-react";
 import ActionTooltip from "@/components/ui/action-tooltip";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import PuzzleHistory from "@/components/puzzles/puzzle-history";
 import GameNotation from "@/components/common/game-notation";
 import MoveControls from "@/components/common/move-controls";
-import { match } from "ts-pattern";
 import PuzzleAnnotation from "@/components/puzzles/puzzle-annotation";
+import PuzzleStatus from "@/components/puzzles/puzzle-status";
 
 const Puzzles = ({ id }: { id: string }) => {
   const store = useContext(ChessStateContext)!;
@@ -34,8 +35,16 @@ const Puzzles = ({ id }: { id: string }) => {
     []
   );
   const [currentPuzzle, setCurrentPuzzle] = useAtom(currentPuzzleAtom);
+
+  let puzzle: Puzzle | null = null;
+  if (puzzles.length > 0) {
+    puzzle = puzzles[currentPuzzle];
+  }
+
   const [jumpToNextPuzzleImmediately, setJumpToNextPuzzleImmediately] =
     useAtom(jumpToNextPuzzleAtom);
+
+  const [currentStatus, setCurrentStatus] = useState<Status>("notstarted");
 
   function setPuzzle(puzzle: { fen: string; moves: string[] }) {
     setFen(puzzle.fen);
@@ -59,8 +68,11 @@ const Puzzles = ({ id }: { id: string }) => {
 
   async function viewSolution() {
     const curPuzzle = puzzles[currentPuzzle];
+    if (curPuzzle.completion !== "correct") {
+      setCurrentStatus("incorrect-complete");
+    }
     if (curPuzzle.completion === "incomplete") {
-      changeCompletion("incorrect");
+      changeCompletion("incorrect-complete");
     }
     goToStart();
     for (let i = 0; i < curPuzzle.moves.length; i++) {
@@ -81,6 +93,10 @@ const Puzzles = ({ id }: { id: string }) => {
     });
   }
 
+  function changeStatus(status: Status) {
+    setCurrentStatus(status);
+  }
+
   const square = match(currentNode)
     .with({ san: "O-O" }, ({ halfMoves }) =>
       parseSquare(halfMoves % 2 === 1 ? "g1" : "g8")
@@ -93,23 +109,39 @@ const Puzzles = ({ id }: { id: string }) => {
   const turnToMove =
     puzzles[currentPuzzle] !== undefined
       ? positionFromFen(puzzles[currentPuzzle]?.fen)[0]?.turn
-      : null;
+      : undefined;
+
+  useEffect(() => {
+    changeStatus("notstarted");
+  }, [currentPuzzle]);
+
+  useEffect(() => {
+    if (!puzzle) return;
+    if (puzzle.completion === "incorrect-complete")
+      changeStatus("incorrect-complete");
+    else if (puzzle.completion === "correct") changeStatus("correct-complete");
+  }, [puzzle]);
+
+  useEffect(() => {
+    if (puzzles.length === 0) generatePuzzle();
+  }, [puzzles]);
 
   return (
     <section>
       <div className="flex gap-4 p-2">
-        <div className="relative">
+        <div className="relative w-[600px] h-[600px]">
           <PuzzleBoard
             key={currentPuzzle}
             puzzles={puzzles}
             currentPuzzle={currentPuzzle}
             changeCompletion={changeCompletion}
+            changeStatus={changeStatus}
             generatePuzzle={generatePuzzle}
           />
           {currentNode.completion &&
             currentNode.move &&
             square !== undefined && (
-              <div className="absolute inset-0 size-full">
+              <div className="absolute inset-0 size-full pointer-events-none">
                 <div className="relative size-full">
                   <PuzzleAnnotation
                     orientation="black"
@@ -198,7 +230,14 @@ const Puzzles = ({ id }: { id: string }) => {
                 </div>
                 <MoveControls readOnly />
               </div>
-              <div className="w-1/4"></div>
+              <div className="w-1/4">
+                <PuzzleStatus
+                  status={currentStatus}
+                  turnToMove={turnToMove}
+                  viewSolution={viewSolution}
+                  generatePuzzle={generatePuzzle}
+                />
+              </div>
             </div>
           </div>
         </div>

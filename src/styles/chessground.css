@@ -1,32 +1,32 @@
 /* 선택된 기물 */
 cg-board square.selected {
-  background: color-mix(in srgb, #3b82f6 50%, transparent);
+  background: rgba(20, 85, 30, 0.5);
 }
 
 /* 이동 가능한 위치 */
 cg-board square.move-dest {
-  background: radial-gradient(rgba(0, 0, 0, 0.3) 25%, rgba(0, 0, 0, 0) 0);
+  background: radial-gradient(rgba(20, 85, 30, 0.5) 19%, rgba(0, 0, 0, 0) 20%);
 }
 
 /* 이동 가능한 위치 (마우스 호버) */
 cg-board square.move-dest:hover {
-  background: color-mix(in srgb, #3b82f6 60%, transparent) !important;
-  border-radius: 0;
-  padding: 0;
+  background: rgba(20, 85, 30, 0.3);
 }
 /* 점유된 칸의 이동 가능 위치 */
 cg-board square.oc.move-dest {
-  background: none;
-  border: 5px solid rgba(0, 0, 0, 0.3);
-  border-radius: 0;
+  background: radial-gradient(
+    transparent 0%,
+    transparent 79%,
+    rgba(20, 85, 0, 0.3) 80%
+  );
 }
 
 /* 점유된 칸의 이동 가능 위치 (마우스 호버) */
 cg-board square.oc.move-dest:hover {
-  background: color-mix(in srgb, #3b82f6 60%, transparent);
+  background: rgba(20, 85, 30, 0.3);
 }
 
 /* 마지막 이동 위치 */
 cg-board square.last-move {
-  background: color-mix(in srgb, #3b82f6 40%, transparent);
+  background: rgba(155, 199, 0, 0.41);
 }

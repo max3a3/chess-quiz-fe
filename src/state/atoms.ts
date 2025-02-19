@@ -47,7 +47,9 @@ export const currentTabAtom = atom(
   }
 );
 
-const currentPuzzleFamily = atomFamily((_: string) => atom(0));
+const currentPuzzleFamily = atomFamily((_: string) =>
+  atomWithStorage("currentPuzzle", 0)
+);
 export const currentPuzzleAtom = tabValue(currentPuzzleFamily);
 
 function tabValue<
@@ -73,6 +75,7 @@ function tabValue<
   );
 }
 
+export const snapArrowsAtom = atomWithStorage<boolean>("snap-dests", true);
 export const jumpToNextPuzzleAtom = atomWithStorage<boolean>(
   "puzzle-jump-immediately",
   true

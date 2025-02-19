@@ -26,6 +26,7 @@ interface ChessStoreState {
   headers: GameHeaders;
   position: number[];
   dirty: boolean;
+  showHint: boolean;
 
   currentNode: () => TreeNode;
 
@@ -76,6 +77,8 @@ interface ChessStoreState {
   setState: (state: TreeState) => void;
   reset: () => void;
   save: () => void;
+
+  toggleHint: () => void;
 }
 
 export type ChessStore = ReturnType<typeof createChessStore>;
@@ -122,13 +125,18 @@ export const createChessStore = (id?: string, initialTree?: TreeState) => {
           return {
             ...state,
             position: [...state.position, 0],
+            showHint: false,
           };
         }
         return state;
       }),
 
     goToPrevious: () =>
-      set((state) => ({ ...state, position: state.position.slice(0, -1) })),
+      set((state) => ({
+        ...state,
+        position: state.position.slice(0, -1),
+        showHint: false,
+      })),
 
     makeMove: ({
       payload,
@@ -140,6 +148,7 @@ export const createChessStore = (id?: string, initialTree?: TreeState) => {
     }) => {
       set(
         produce((state) => {
+          state.showHint = false;
           if (typeof payload === "string") {
             const node = getNodeAtPath(state.root, state.position);
             if (!node) return;
@@ -180,6 +189,7 @@ export const createChessStore = (id?: string, initialTree?: TreeState) => {
       set(
         produce((state) => {
           state.dirty = true;
+          state.showHint = false;
           const node = getNodeAtPath(state.root, state.position);
           const [pos] = positionFromFen(node.fen);
           if (!pos) return;
@@ -204,6 +214,7 @@ export const createChessStore = (id?: string, initialTree?: TreeState) => {
     goToEnd: () =>
       set(
         produce((state) => {
+          state.showHint = false;
           const endPosition: number[] = [];
           let currentNode = state.root;
           while (currentNode.children.length > 0) {
@@ -217,16 +228,19 @@ export const createChessStore = (id?: string, initialTree?: TreeState) => {
       set((state) => ({
         ...state,
         position: state.headers.start || [],
+        showHint: false,
       })),
     goToMove: (move) =>
       set((state) => ({
         ...state,
         position: move,
+        showHint: false,
       })),
     //변화도 시작점으로 이동
     goToBranchStart: () => {
       set(
         produce((state) => {
+          state.showHint = false;
           if (
             state.position.length > 0 &&
             state.position[state.position.length - 1] !== 0
@@ -246,6 +260,7 @@ export const createChessStore = (id?: string, initialTree?: TreeState) => {
     goToBranchEnd: () => {
       set(
         produce((state) => {
+          state.showHint = false;
           let currentNode = getNodeAtPath(state.root, state.position);
           while (currentNode.children.length > 0) {
             state.position.push(0);
@@ -257,6 +272,7 @@ export const createChessStore = (id?: string, initialTree?: TreeState) => {
     nextBranch: () =>
       set(
         produce((state) => {
+          state.showHint = false;
           if (state.position.length === 0) return;
 
           const parent = getNodeAtPath(state.root, state.position.slice(0, -1));
@@ -277,6 +293,7 @@ export const createChessStore = (id?: string, initialTree?: TreeState) => {
     previousBranch: () =>
       set(
         produce((state) => {
+          state.showHint = false;
           if (state.position.length === 0) return;
 
           const parent = getNodeAtPath(state.root, state.position.slice(0, -1));
@@ -297,6 +314,7 @@ export const createChessStore = (id?: string, initialTree?: TreeState) => {
     nextBranching: () =>
       set(
         produce((state) => {
+          state.showHint = false;
           let node = getNodeAtPath(state.root, state.position);
           let branchCount = node.children.length;
 
@@ -312,6 +330,7 @@ export const createChessStore = (id?: string, initialTree?: TreeState) => {
     previousBranching: () =>
       set(
         produce((state) => {
+          state.showHint = false;
           let node = getNodeAtPath(state.root, state.position);
           let branchCount = node.children.length;
 
@@ -418,6 +437,23 @@ export const createChessStore = (id?: string, initialTree?: TreeState) => {
             state.dirty = true;
             node.shapes = [];
           }
+        })
+      ),
+
+    toggleHint: () =>
+      set(
+        produce((state) => {
+          if (!state.showHint) {
+            // Move to end
+            const endPosition: number[] = [];
+            let currentNode = state.root;
+            while (currentNode.children.length > 0) {
+              endPosition.push(0);
+              currentNode = currentNode.children[0];
+            }
+            state.position = endPosition;
+          }
+          state.showHint = !state.showHint;
         })
       ),
   });

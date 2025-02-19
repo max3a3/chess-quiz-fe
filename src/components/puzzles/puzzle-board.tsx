@@ -1,23 +1,35 @@
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { useStore } from "zustand";
 import { useForceUpdate } from "@toss/react";
-import { Chess, makeUci, Move, NormalMove, parseSquare } from "chessops";
+import {
+  Chess,
+  makeSquare,
+  makeUci,
+  Move,
+  NormalMove,
+  parseSquare,
+  parseUci,
+  SquareName,
+} from "chessops";
 import { parseFen } from "chessops/fen";
 import { chessgroundDests, chessgroundMove } from "chessops/compat";
+import { DrawShape } from "chessground/draw";
 import equal from "fast-deep-equal";
 import { useAtom } from "jotai/react";
 
 import ChessBoard from "@/components/chess-board";
 import { ChessStateContext } from "@/provider/chess-state-context";
-import { Completion, Puzzle } from "@/utils/puzzles";
+import { Completion, Puzzle, Status } from "@/utils/puzzles";
 import { getNodeAtPath, treeIteratorMainLine } from "@/utils/tree-reducer";
 import { positionFromFen } from "@/utils/chessops";
-import { jumpToNextPuzzleAtom } from "@/state/atoms";
+import { jumpToNextPuzzleAtom, snapArrowsAtom } from "@/state/atoms";
+import PromotionModal from "@/components/common/promotion-modal";
 
 interface PuzzleBoardProps {
   puzzles: Puzzle[];
   currentPuzzle: number;
   changeCompletion: (completion: Completion) => void;
+  changeStatus: (status: Status) => void;
   generatePuzzle: () => void;
 }
 
@@ -25,14 +37,19 @@ const PuzzleBoard = ({
   puzzles,
   currentPuzzle,
   changeCompletion,
+  changeStatus,
   generatePuzzle,
 }: PuzzleBoardProps) => {
   const store = useContext(ChessStateContext)!;
   const root = useStore(store, (s) => s.root);
   const position = useStore(store, (s) => s.position);
+  const showHint = useStore(store, (s) => s.showHint);
   const makeMove = useStore(store, (s) => s.makeMove);
   const makeMoves = useStore(store, (s) => s.makeMoves);
+  const setShapes = useStore(store, (s) => s.setShapes);
   const reset = useForceUpdate();
+
+  const [snapArrows] = useAtom(snapArrowsAtom);
   const [jumpToNextPuzzleImmediately] = useAtom(jumpToNextPuzzleAtom);
 
   const currentNode = getNodeAtPath(root, position);
@@ -62,7 +79,11 @@ const PuzzleBoard = ({
       ? "black"
       : "white"
     : "white";
-  const dests = pos ? chessgroundDests(pos) : new Map();
+  const [pendingMove, setPendingMove] = useState<NormalMove | null>(null);
+
+  const dests: Map<SquareName, SquareName[]> = pos
+    ? chessgroundDests(pos)
+    : new Map();
   const turn = pos?.turn || "white";
 
   function checkMove(move: Move) {
@@ -77,14 +98,19 @@ const PuzzleBoard = ({
     if (puzzle.moves[currentMove] === uci || newPos.isCheckmate()) {
       //퍼즐이 완성된 경우
       if (currentMove === puzzle.moves.length - 1) {
-        if (puzzle.completion !== "incorrect") {
+        if (!puzzle.completion.startsWith("incorrect")) {
           changeCompletion("correct");
+          changeStatus("correct-complete");
+        } else {
+          changeCompletion("incorrect-complete");
+          changeStatus("incorrect-complete");
         }
-
         //퍼즐 즉시 생성 유무
         if (jumpToNextPuzzleImmediately) {
           generatePuzzle();
         }
+      } else {
+        changeStatus("correct");
       }
       //퍼즐의 다음 이동을 가져와 실행
       const newMoves = puzzle.moves.slice(currentMove, currentMove + 2);
@@ -102,7 +128,8 @@ const PuzzleBoard = ({
         changeHeaders: false,
         completion: "incorrect",
       });
-      changeCompletion("incorrect");
+      changeCompletion("incorrect-incomplete");
+      changeStatus("incorrect");
     }
     reset();
   }
@@ -114,13 +141,49 @@ const PuzzleBoard = ({
     });
   }
 
+  function findSelected() {
+    if (!puzzle || !pos) return;
+    const newMove = puzzle.moves[currentMove];
+    const parsedMove = parseUci(newMove) as NormalMove;
+    if (!parsedMove) return;
+    const from = makeSquare(parsedMove.from);
+    return from;
+  }
+
+  let selected = showHint ? findSelected() : null;
+
+  let shapes: DrawShape[] = [];
+  if (currentNode.shapes.length > 0) {
+    shapes = shapes.concat(currentNode.shapes);
+  }
+
   const isEnded = puzzle ? currentMove >= puzzle.moves.length : false;
 
+  //console.log(currentNode, pos);
+
   return (
-    <div>
+    <div
+      onMouseDown={() => {
+        setShapes([]);
+      }}
+      className="size-full"
+    >
+      <PromotionModal
+        pendingMove={pendingMove}
+        cancelMove={() => setPendingMove(null)}
+        confirmMove={(p) => {
+          if (pendingMove) {
+            isEnded
+              ? practiceMove({ ...pendingMove, promotion: p })
+              : checkMove({ ...pendingMove, promotion: p });
+            setPendingMove(null);
+          }
+        }}
+        turn={turn}
+        orientation={orientation}
+      />
       <ChessBoard
         animation={{ enabled: true }}
-        coordinates={false}
         orientation={orientation}
         movable={{
           free: false,
@@ -134,7 +197,15 @@ const PuzzleBoard = ({
               const from = parseSquare(orig)!;
               const to = parseSquare(dest)!;
               const move: NormalMove = { from, to };
-              isEnded ? practiceMove(move) : checkMove(move);
+              if (
+                pos?.board.get(from)?.role === "pawn" &&
+                ((dest[1] === "8" && turn === "white") ||
+                  (dest[1] === "1" && turn === "black"))
+              ) {
+                setPendingMove(move);
+              } else {
+                isEnded ? practiceMove(move) : checkMove(move);
+              }
             },
           },
         }}
@@ -150,6 +221,18 @@ const PuzzleBoard = ({
         turnColor={turn}
         fen={currentNode.fen}
         check={pos?.isCheck()}
+        drawable={{
+          enabled: true,
+          visible: true,
+          defaultSnapToValidMove: snapArrows,
+          autoShapes: selected
+            ? [{ orig: selected, brush: "green" }, ...shapes]
+            : shapes,
+          onChange: (shapes) => {
+            setShapes(shapes);
+          },
+        }}
+        hintSelected={selected}
       />
     </div>
   );

@@ -24,6 +24,7 @@ cg-board {
   user-select: none;
   line-height: 0;
   background-size: cover;
+  cursor: pointer;
 }
 
 cg-board square {
@@ -72,7 +73,7 @@ piece.fading {
 }
 
 .cg-wrap piece.ghost {
-  opacity: 0;
+  opacity: 0.25;
 }
 
 .cg-wrap piece svg {

@@ -25,6 +25,7 @@ export function positionFromFen(
     (e) => [null, e]
   );
   if (error) {
+    console.log(error);
     return [null, error];
   }
 
@@ -52,7 +53,7 @@ export function squareToCoordinates(
   square: Square,
   orientation: "white" | "black"
 ) {
-  let file = squareFile(square);
+  let file = squareFile(square) + 1;
   let rank = squareRank(square) + 1;
   if (orientation === "black") {
     file = 9 - file;

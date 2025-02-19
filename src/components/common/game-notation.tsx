@@ -6,7 +6,9 @@ import CompleteMoveCell from "@/components/common/complete-move-cell";
 import { ChessStateContext } from "@/provider/chess-state-context";
 import { TreeNode } from "@/utils/tree-reducer";
 import { getMovePairs } from "@/utils/chessops";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import SimpleBar from "@/components/common/simplebar";
+import { cn } from "@/lib/utils";
+import * as classes from "@/styles/simplebar.css";
 
 const GameNotation = () => {
   const store = useContext(ChessStateContext)!;
@@ -24,21 +26,23 @@ const GameNotation = () => {
       if (currentPosition.length === 0) {
         scrollRef.current.scrollTo({ top: 0 });
       } else if (targetRef.current) {
-        scrollRef.current.scrollTo({ top: targetRef.current.offsetTop - 370 });
+        targetRef.current.scrollIntoView();
       }
     }
   }, [currentPosition]);
 
   return (
-    <ScrollArea
+    <SimpleBar
       ref={scrollRef}
-      tabIndex={0}
       onKeyDown={(event) => {
         if (event.key === "ArrowUp" || event.key === "ArrowDown") {
           event.preventDefault();
         }
       }}
-      className="h-[350px] bg-primary rounded-md"
+      className="h-[350px] bg-primary rounded-md overflow-x-hidden"
+      classNames={{
+        scrollbar: cn("simplebar-scrollbar", classes.SimpleBarScrollBar),
+      }}
     >
       {movePairs.map((movePair, i) => (
         <MovePair
@@ -50,7 +54,7 @@ const GameNotation = () => {
           targetRef={targetRef}
         />
       ))}
-    </ScrollArea>
+    </SimpleBar>
   );
 };
 

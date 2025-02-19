@@ -1,7 +1,8 @@
-import { cn } from "@/lib/utils";
-import { Completion } from "@/utils/puzzles";
 import { IconCheck, IconDots, IconX } from "@tabler/icons-react";
 import { match } from "ts-pattern";
+
+import { cn } from "@/lib/utils";
+import { Completion } from "@/utils/puzzles";
 
 type History = {
   completion: Completion;
@@ -40,22 +41,25 @@ const PuzzleHistory = ({
               </div>
             </div>
           ))
-          .with("incorrect", () => (
-            <div key={index}>
-              <div
-                onClick={() => onSelect(index)}
-                className={cn(
-                  "flex items-center justify-center size-7 rounded-md bg-[#3B2326]  border-[#FF0000] cursor-pointer hover:bg-opacity-80",
-                  isCurrent && "border"
-                )}
-              >
-                <IconX color="red" />
+          .when(
+            (v) => v === "incorrect-complete" || v === "incorrect-incomplete",
+            () => (
+              <div key={index}>
+                <div
+                  onClick={() => onSelect(index)}
+                  className={cn(
+                    "flex items-center justify-center size-7 rounded-md bg-[#3B2326]  border-[#FF0000] cursor-pointer hover:bg-opacity-80",
+                    isCurrent && "border"
+                  )}
+                >
+                  <IconX color="red" />
+                </div>
+                <div className="w-full text-red-300 text-xs text-center">
+                  {history.label}
+                </div>
               </div>
-              <div className="w-full text-red-300 text-xs text-center">
-                {history.label}
-              </div>
-            </div>
-          ))
+            )
+          )
           .with("incomplete", () => (
             <div key={index} className="flex flex-col items-center">
               <div
