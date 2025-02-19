@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { useContext , useState } from "react";
 import { useStore } from "zustand";
 import { Chess, makeUci, Move, NormalMove, parseSquare } from "chessops";
 import { parseFen } from "chessops/fen";
