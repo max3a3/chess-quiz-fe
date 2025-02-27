@@ -50,6 +50,22 @@ const NewTabHome = ({ id }: { id: string }) => {
         setActiveTab(id);
       },
     },
+    {
+      icon: <IconPuzzle size={60} stroke={1.5} />,
+      title: "Analysis",
+      description: "Train your chess skills",
+      label: "Train",
+      onClick: () => {
+        setTabs((prev) => {
+          const tab = prev.find((t) => t.value === id);
+          if (!tab) return prev;
+          tab.name = "Analysis";
+          tab.type = "analysis";
+          return [...prev];
+        });
+        setActiveTab(id);
+      },
+    },
   ];
 
   return (

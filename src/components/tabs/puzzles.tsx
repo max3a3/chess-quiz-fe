@@ -1,26 +1,23 @@
-import { useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import { useStore } from "zustand";
 import { useSessionStorage } from "usehooks-ts";
 import { useAtom } from "jotai/react";
 import { parseSquare, parseUci } from "chessops";
-import { PlusIcon, XIcon } from "lucide-react";
 import { match } from "ts-pattern";
 
 import { ChessStateContext } from "@/provider/chess-state-context";
 import { Completion, Puzzle, Status } from "@/utils/puzzles";
-import { currentPuzzleAtom, jumpToNextPuzzleAtom } from "@/state/atoms";
+import { currentPuzzleAtom } from "@/state/atoms";
 import { positionFromFen } from "@/utils/chessops";
 import PuzzleBoard from "@/components/puzzles/puzzle-board";
 import { getPuzzle } from "@/api/puzzles-api";
-import { Button } from "@/components/ui/button";
-import ActionTooltip from "@/components/ui/action-tooltip";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
 import PuzzleHistory from "@/components/puzzles/puzzle-history";
 import GameNotation from "@/components/common/game-notation";
 import MoveControls from "@/components/common/move-controls";
 import PuzzleAnnotation from "@/components/puzzles/puzzle-annotation";
 import PuzzleStatus from "@/components/puzzles/puzzle-status";
+import PuzzleDashBoard from "@/components/puzzles/puzzle-dashboard";
+import EvalListener from "@/components/common/eval-listener";
 
 const Puzzles = ({ id }: { id: string }) => {
   const store = useContext(ChessStateContext)!;
@@ -41,17 +38,20 @@ const Puzzles = ({ id }: { id: string }) => {
     puzzle = puzzles[currentPuzzle];
   }
 
-  const [jumpToNextPuzzleImmediately, setJumpToNextPuzzleImmediately] =
-    useAtom(jumpToNextPuzzleAtom);
-
   const [currentStatus, setCurrentStatus] = useState<Status>("notstarted");
 
-  function setPuzzle(puzzle: { fen: string; moves: string[] }) {
+  async function setPuzzle(puzzle: { fen: string; moves: string[] }) {
     setFen(puzzle.fen);
+    makeMove({
+      payload: parseUci(puzzle.moves[0])!,
+      changePosition: false,
+      sound: false,
+    });
+    await new Promise((r) => setTimeout(r, 100));
     makeMove({ payload: parseUci(puzzle.moves[0])! });
   }
 
-  function generatePuzzle() {
+  const generatePuzzle = useCallback(() => {
     getPuzzle().then((puzzle) => {
       const newPuzzle: Puzzle = {
         ...puzzle,
@@ -64,7 +64,12 @@ const Puzzles = ({ id }: { id: string }) => {
       setCurrentPuzzle(puzzles.length);
       setPuzzle(newPuzzle);
     });
-  }
+  }, []);
+
+  const clearSession = useCallback(() => {
+    setPuzzles([]);
+    reset();
+  }, []);
 
   async function viewSolution() {
     const curPuzzle = puzzles[currentPuzzle];
@@ -127,9 +132,10 @@ const Puzzles = ({ id }: { id: string }) => {
   }, [puzzles]);
 
   return (
-    <section>
-      <div className="flex gap-4 p-2">
-        <div className="relative w-[600px] h-[600px]">
+    <section className="h-full">
+      <EvalListener />
+      <div className="flex gap-4 p-2 h-full">
+        <div className="relative w-[800px] h-[800px]">
           <PuzzleBoard
             key={currentPuzzle}
             puzzles={puzzles}
@@ -152,64 +158,15 @@ const Puzzles = ({ id }: { id: string }) => {
               </div>
             )}
         </div>
-        <div className="flex flex-col space-y-2 flex-1">
-          <div className="space-y-3 p-4 bg-primary rounded-md">
-            <div className="flex justify-between items-center">
-              {turnToMove && (
-                <h4 className="font-semibold text-2xl text-muted">
-                  {turnToMove === "white" ? "Black " : "White "}
-                  To Move
-                </h4>
-              )}
-              <div className="flex items-center gap-1">
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    checked={jumpToNextPuzzleImmediately}
-                    onCheckedChange={(checked) =>
-                      setJumpToNextPuzzleImmediately(checked)
-                    }
-                    id="jump-to-next-puzzle-immediately"
-                    className="data-[state=checked]:bg-slate-700"
-                  />
-                  <Label
-                    htmlFor="jump-to-next-puzzle-immediately"
-                    className="text-muted"
-                  >
-                    Jump to next puzzle immediately
-                  </Label>
-                </div>
-                <ActionTooltip label="New Puzzle">
-                  <Button
-                    variant="default"
-                    onClick={generatePuzzle}
-                    size="icon"
-                  >
-                    <PlusIcon className="text-muted" />
-                  </Button>
-                </ActionTooltip>
-                <ActionTooltip label="Clear Session">
-                  <Button
-                    variant="default"
-                    onClick={() => {
-                      setPuzzles([]);
-                      reset();
-                    }}
-                    size="icon"
-                  >
-                    <XIcon className="text-muted" />
-                  </Button>
-                </ActionTooltip>
-              </div>
+        <div className="flex-1 flex flex-col space-y-2 h-full overflow-hidden">
+          <div className="flex flex-col space-y-2 h-full overflow-hidden">
+            <div className="h-full p-4 bg-primary rounded-md overflow-hidden">
+              <PuzzleDashBoard
+                turnToMove={turnToMove}
+                generatePuzzle={generatePuzzle}
+                clearSession={clearSession}
+              />
             </div>
-            <Button
-              variant="secondary"
-              disabled={puzzles.length === 0}
-              onClick={viewSolution}
-            >
-              View Solution
-            </Button>
-          </div>
-          <div className="flex flex-col space-y-2 h-full">
             <div className="p-4 bg-primary rounded-md">
               <PuzzleHistory
                 histories={puzzles.map((p) => ({
@@ -223,21 +180,21 @@ const Puzzles = ({ id }: { id: string }) => {
                 }}
               />
             </div>
-            <div className="flex gap-2 flex-1">
-              <div className="flex flex-col space-y-2 flex-1">
-                <div className="flex-1">
-                  <GameNotation />
-                </div>
-                <MoveControls readOnly />
+          </div>
+          <div className="flex gap-2 h-full">
+            <div className="flex flex-col space-y-2 flex-1">
+              <div className="flex-1">
+                <GameNotation />
               </div>
-              <div className="w-1/4">
-                <PuzzleStatus
-                  status={currentStatus}
-                  turnToMove={turnToMove}
-                  viewSolution={viewSolution}
-                  generatePuzzle={generatePuzzle}
-                />
-              </div>
+              <MoveControls readOnly />
+            </div>
+            <div className="w-1/4">
+              <PuzzleStatus
+                status={currentStatus}
+                turnToMove={turnToMove}
+                viewSolution={viewSolution}
+                generatePuzzle={generatePuzzle}
+              />
             </div>
           </div>
         </div>

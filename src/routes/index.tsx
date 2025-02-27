@@ -12,6 +12,7 @@ import ChessStateProvider from "@/provider/chess-state-context";
 import NewTabHome from "@/components/tabs/new-tab-home";
 import BoardGame from "@/components/tabs/board-game";
 import Puzzles from "@/components/tabs/puzzles";
+import Analysis from "@/components/tabs/analysis";
 
 export const Route = createFileRoute("/")({
   component: HomePage,
@@ -75,7 +76,7 @@ function HomePage() {
     <Tabs
       value={activeTab || undefined}
       onValueChange={(value) => setActiveTab(value)}
-      className="space-y-3 p-4"
+      className="flex flex-col space-y-3 pt-4 px-4 h-full"
     >
       <div className="flex gap-2">
         {tabs.map((tab) => (
@@ -104,17 +105,15 @@ function HomePage() {
           <PlusIcon className="size-5" />
         </button>
       </div>
-      <div>
-        {tabs.map((tab) => (
-          <TabsContent
-            key={tab.value}
-            value={tab.value}
-            className="focus:outline-none"
-          >
-            <TabSwitch tab={tab} />
-          </TabsContent>
-        ))}
-      </div>
+      {tabs.map((tab) => (
+        <TabsContent
+          key={tab.value}
+          value={tab.value}
+          className="h-full focus:outline-none overflow-hidden"
+        >
+          <TabSwitch tab={tab} />
+        </TabsContent>
+      ))}
     </Tabs>
   );
 }
@@ -130,6 +129,11 @@ function TabSwitch({ tab }: { tab: Tab }) {
     .with("puzzles", () => (
       <ChessStateProvider id={tab.value}>
         <Puzzles id={tab.value} />
+      </ChessStateProvider>
+    ))
+    .with("analysis", () => (
+      <ChessStateProvider id={tab.value}>
+        <Analysis id={tab.value} />
       </ChessStateProvider>
     ))
     .exhaustive();

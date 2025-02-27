@@ -39,7 +39,7 @@ const GameNotation = () => {
           event.preventDefault();
         }
       }}
-      className="h-[350px] bg-primary rounded-md overflow-x-hidden"
+      className="h-full max-h-[350px] bg-primary rounded-md overflow-x-hidden"
       classNames={{
         scrollbar: cn("simplebar-scrollbar", classes.SimpleBarScrollBar),
       }}

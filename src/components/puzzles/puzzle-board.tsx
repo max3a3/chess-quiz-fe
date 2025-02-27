@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useMemo, useState } from "react";
 import { useStore } from "zustand";
 import { useForceUpdate } from "@toss/react";
 import {
@@ -21,9 +21,16 @@ import ChessBoard from "@/components/chess-board";
 import { ChessStateContext } from "@/provider/chess-state-context";
 import { Completion, Puzzle, Status } from "@/utils/puzzles";
 import { getNodeAtPath, treeIteratorMainLine } from "@/utils/tree-reducer";
-import { positionFromFen } from "@/utils/chessops";
-import { jumpToNextPuzzleAtom, snapArrowsAtom } from "@/state/atoms";
+import { getVariationLine, positionFromFen } from "@/utils/chessops";
+import {
+  enginesAtom,
+  jumpToNextPuzzleAtom,
+  snapArrowsAtom,
+} from "@/state/atoms";
 import PromotionModal from "@/components/common/promotion-modal";
+import EvalListener from "@/components/common/eval-listener";
+import { useShallow } from "zustand/react/shallow";
+import BestMoves from "@/components/analysis/best-moves";
 
 interface PuzzleBoardProps {
   puzzles: Puzzle[];
@@ -159,7 +166,22 @@ const PuzzleBoard = ({
 
   const isEnded = puzzle ? currentMove >= puzzle.moves.length : false;
 
-  //console.log(currentNode, pos);
+  const headers = useStore(store, (s) => s.headers);
+  const is960 = useMemo(() => headers.variant === "Chess960", [headers]);
+  const moves = useStore(
+    store,
+    useShallow((s) => getVariationLine(s.root, s.position, is960))
+  );
+  const currentNodeHalfMoves = useStore(
+    store,
+    useShallow((s) => s.currentNode().halfMoves)
+  );
+
+  const [engines, setEngines] = useAtom(enginesAtom);
+  const loadedEngines = useMemo(
+    () => engines.filter((e) => e.loaded),
+    [engines]
+  );
 
   return (
     <div

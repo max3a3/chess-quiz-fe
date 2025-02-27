@@ -122,7 +122,7 @@ const PuzzleStatus = ({
             <h5 className="font-semibold text-xl text-muted">성공!</h5>
             <Button
               variant="secondary"
-              className="w-full font-semibold"
+              className="w-full px-0 font-semibold"
               onClick={generatePuzzle}
             >
               연습 계속하기
@@ -134,7 +134,7 @@ const PuzzleStatus = ({
             <h5 className="font-semibold text-xl text-muted">퍼즐 완료!</h5>
             <Button
               variant="secondary"
-              className="w-full font-semibold"
+              className="w-full px-0 font-semibold"
               onClick={generatePuzzle}
             >
               연습 계속하기

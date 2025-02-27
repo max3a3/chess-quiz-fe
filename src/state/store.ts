@@ -20,6 +20,7 @@ import {
 import { isPrefix } from "@/utils/misc";
 import { NodeCompletion } from "@/utils/puzzles";
 import { Annotation, ANNOTATION_INFO } from "@/utils/annotation";
+import { Score } from "@/utils/types";
 
 interface ChessStoreState {
   root: TreeNode;
@@ -49,6 +50,7 @@ interface ChessStoreState {
     clock?: number;
     changeHeaders?: boolean;
     completion?: NodeCompletion;
+    sound?: boolean;
   }) => void;
 
   appendMove: (args: { payload: Move; clock?: number }) => void;
@@ -66,6 +68,7 @@ interface ChessStoreState {
 
   setStart: (start: number[]) => void;
 
+  setScore: (score: Score) => void;
   setAnnotation: (payload: Annotation, pos?: number[]) => void;
   setHeaders: (payload: GameHeaders) => void;
   setShapes: (shapes: DrawShape[]) => void;
@@ -145,6 +148,7 @@ export const createChessStore = (id?: string, initialTree?: TreeState) => {
       clock,
       changeHeaders = true,
       completion,
+      sound,
     }) => {
       set(
         produce((state) => {
@@ -167,6 +171,7 @@ export const createChessStore = (id?: string, initialTree?: TreeState) => {
             mainline,
             clock,
             completion,
+            sound,
           });
         })
       );
@@ -384,6 +389,16 @@ export const createChessStore = (id?: string, initialTree?: TreeState) => {
         produce((state) => {
           state.dirty = true;
           state.headers.start = start;
+        })
+      ),
+    setScore: (score) =>
+      set(
+        produce((state) => {
+          state.dirty = true;
+          const node = getNodeAtPath(state.root, state.position);
+          if (node) {
+            node.score = score;
+          }
         })
       ),
     setAnnotation: (payload, pos) =>

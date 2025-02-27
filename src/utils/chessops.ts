@@ -7,15 +7,25 @@ import {
 } from "@/utils/tree-reducer";
 import {
   Chess,
-  Move,
+  type Color,
+  makeUci,
+  type Move,
   parseUci,
-  PositionError,
-  Square,
+  type PositionError,
+  type Square,
   squareFile,
   squareRank,
 } from "chessops";
-import { FenError, INITIAL_FEN, parseFen } from "chessops/fen";
+import { castlingSide, IllegalSetup, normalizeMove } from "chessops/chess";
+import {
+  FenError,
+  INITIAL_FEN,
+  InvalidFen,
+  makeFen,
+  parseFen,
+} from "chessops/fen";
 import { parseSan } from "chessops/san";
+import { match } from "ts-pattern";
 
 export function positionFromFen(
   fen: string
@@ -25,7 +35,6 @@ export function positionFromFen(
     (e) => [null, e]
   );
   if (error) {
-    console.log(error);
     return [null, error];
   }
 
@@ -293,4 +302,82 @@ export function getMovePairs(root: TreeNode): [TreeNode, TreeNode | null][] {
   }
 
   return movePairs;
+}
+
+export function swapMove(fen: string, color?: Color) {
+  const setup = parseFen(fen).unwrap();
+  if (color) {
+    setup.turn = color;
+  } else {
+    setup.turn = setup.turn === "white" ? "black" : "white";
+  }
+
+  return makeFen(setup);
+}
+
+export function uciNormalize(chess: Chess, move: Move, chess960?: boolean) {
+  const side = castlingSide(chess, move);
+  const frcMove = normalizeMove(chess, move);
+  if (side && !chess960) {
+    const standardMove = match(makeUci(frcMove))
+      .with("e1h1", () => "e1g1")
+      .with("e1a1", () => "e1c1")
+      .with("e8h8", () => "e8g8")
+      .with("e8a8", () => "e8c8")
+      .otherwise((v) => v);
+    return standardMove;
+  }
+  return makeUci(frcMove);
+}
+
+export function getVariationLine(
+  root: TreeNode,
+  position: number[],
+  chess960?: boolean,
+  includeLastMove = false
+): string[] {
+  const moves = [];
+  let node = root;
+  const [chess] = positionFromFen(root.fen);
+  if (!chess) {
+    return [];
+  }
+  for (const pos of position) {
+    node = node.children[pos];
+    if (node.move) {
+      moves.push(uciNormalize(chess, node.move, chess960));
+      chess.play(node.move);
+    }
+  }
+  if (includeLastMove && node.children.length > 0) {
+    moves.push(uciNormalize(chess, node.children[0].move!, chess960));
+  }
+  return moves;
+}
+
+export function chessopsError(error: PositionError | FenError) {
+  return match(error)
+    .with({ message: IllegalSetup.Empty }, () => "Errors.EmptyBoard")
+    .with({ message: IllegalSetup.Kings }, () => "Errors.InvalidKings")
+    .with({ message: IllegalSetup.OppositeCheck }, () => "Errors.OppositeCheck")
+    .with(
+      { message: IllegalSetup.PawnsOnBackrank },
+      () => "Errors.PawnsOnBackrank"
+    )
+    .with({ message: InvalidFen.Board }, () => "Errors.InvalidBoard")
+    .with(
+      { message: InvalidFen.Castling },
+      () => "Errors.InvalidCastlingRights"
+    )
+    .with({ message: InvalidFen.EpSquare }, () => "Errors.InvalidEpSquare")
+    .with({ message: InvalidFen.Fen }, () => "Errors.InvalidFen")
+    .with({ message: InvalidFen.Fullmoves }, () => "Errors.InvalidFullmoves")
+    .with({ message: InvalidFen.Halfmoves }, () => "Errors.InvalidHalfmoves")
+    .with({ message: InvalidFen.Pockets }, () => "Errors.InvalidPockets")
+    .with(
+      { message: InvalidFen.RemainingChecks },
+      () => "Errors.InvalidRemainingChecks"
+    )
+    .with({ message: InvalidFen.Turn }, () => "Errors.InvalidTurn")
+    .otherwise(() => "Errors.Unknown");
 }
