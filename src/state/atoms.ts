@@ -75,10 +75,11 @@ export const currentTabAtom = atom(
   }
 );
 
-const currentPuzzleFamily = atomFamily((_: string) =>
-  atomWithStorage("currentPuzzle", 0)
+export const activePuzzleAtom = atomWithStorage<string | null>(
+  "activePuzzle",
+  null,
+  createJSONStorage(() => sessionStorage)
 );
-export const currentPuzzleAtom = tabValue(currentPuzzleFamily);
 
 function tabValue<
   T extends object | string | boolean | number | null | undefined,
@@ -128,78 +129,80 @@ export const moveNotationTypeAtom = atomWithStorage<"letters" | "symbols">(
   "symbols"
 );
 
+const engines: Engine[] = [
+  {
+    type: "local",
+    name: "Stockfish 16 NNUE · 7MB",
+    short: "SF 16 · 7MB",
+    tech: "NNUE",
+    requires: ["sharedMem", "simd", "dynamicImportFromWorker"],
+    minMem: 1536,
+    assets: {
+      version: "sfw008",
+      root: "/node_modules/lila-stockfish-web",
+      js: "sf16-7.js",
+    },
+    loaded: true,
+    settings: [
+      {
+        name: "MultiPV",
+        value: 1,
+      },
+      { name: "Threads", value: 1 },
+      { name: "Hash", value: 4 },
+    ],
+  },
+  {
+    type: "local",
+    name: "Stockfish 17 NNUE · 79MB",
+    short: "SF 17 · 79MB",
+    tech: "NNUE",
+    requires: ["sharedMem", "simd", "dynamicImportFromWorker"],
+    minMem: 2560,
+    assets: {
+      version: "sfw008",
+      root: "/node_modules/lila-stockfish-web",
+      js: "sf16-7.js",
+    },
+    loaded: true,
+    settings: [
+      {
+        name: "MultiPV",
+        value: 1,
+      },
+      { name: "Threads", value: 1 },
+      { name: "Hash", value: 4 },
+    ],
+  },
+  {
+    type: "local",
+    name: "Stockfish 11 HCE",
+    short: "SF 11",
+    tech: "HCE",
+    requires: ["sharedMem"],
+    minThreads: 1,
+    minMem: 1024,
+    assets: {
+      version: "a022fa",
+      root: "/node_modules/stockfish.wasm",
+      js: "stockfish.js",
+      wasm: "stockfish.wasm",
+    },
+    loaded: true,
+    settings: [
+      {
+        name: "MultiPV",
+        value: 1,
+      },
+      { name: "Threads", value: 1 },
+      { name: "Hash", value: 4 },
+    ],
+  },
+];
+
 export const enginesAtom = atomWithStorage<Engine[]>(
   "engines/engines.json",
-  [
-    {
-      type: "local",
-      name: "Stockfish 16 NNUE · 7MB",
-      short: "SF 16 · 7MB",
-      tech: "NNUE",
-      requires: ["sharedMem", "simd", "dynamicImportFromWorker"],
-      minMem: 1536,
-      assets: {
-        version: "sfw008",
-        root: "/node_modules/lila-stockfish-web",
-        js: "sf16-7.js",
-      },
-      loaded: true,
-      settings: [
-        {
-          name: "MultiPV",
-          value: 1,
-        },
-        { name: "Threads", value: 1 },
-        { name: "Hash", value: 4 },
-      ],
-    },
-    {
-      type: "local",
-      name: "Stockfish 17 NNUE · 79MB",
-      short: "SF 17 · 79MB",
-      tech: "NNUE",
-      requires: ["sharedMem", "simd", "dynamicImportFromWorker"],
-      minMem: 2560,
-      assets: {
-        version: "sfw008",
-        root: "/node_modules/lila-stockfish-web",
-        js: "sf16-7.js",
-      },
-      loaded: true,
-      settings: [
-        {
-          name: "MultiPV",
-          value: 1,
-        },
-        { name: "Threads", value: 1 },
-        { name: "Hash", value: 4 },
-      ],
-    },
-    {
-      type: "local",
-      name: "Stockfish 11 HCE",
-      short: "SF 11",
-      tech: "HCE",
-      requires: ["sharedMem"],
-      minThreads: 1,
-      minMem: 1024,
-      assets: {
-        version: "a022fa",
-        root: "/node_modules/stockfish.wasm",
-        js: "stockfish.js",
-        wasm: "stockfish.wasm",
-      },
-      loaded: true,
-      settings: [
-        {
-          name: "MultiPV",
-          value: 1,
-        },
-        { name: "Threads", value: 1 },
-        { name: "Hash", value: 4 },
-      ],
-    },
-  ],
+  engines,
   createAsyncZodStorage(zodArray(engineSchema), indexedDBStorage)
 );
 
@@ -212,9 +215,9 @@ export const selectedEngineAtom = atomWithStorage<Engine | null>(
 const loadableEnginesAtom = loadable(enginesAtom);
 
 export const engineMovesFamily = atomFamily(
-  ({}: { tab: string; engine: string }) =>
+  ({}: { tab: string; engine: string; puzzle: string }) =>
     atom<Map<string, BestMoves[]>>(new Map()),
-  (a, b) => a.tab === b.tab && a.engine === b.engine
+  (a, b) => a.tab === b.tab && a.engine === b.engine && a.puzzle === b.puzzle
 );
 
 export const engineProgressFamily = atomFamily(
@@ -227,7 +230,8 @@ export const bestMovesFamily = atomFamily(
   ({ fen, gameMoves }: { fen: string; gameMoves: string[] }) =>
     atom<Map<number, { pv: string[]; winChance: number }[]>>((get) => {
       const tab = get(activeTabAtom);
-      if (!tab) return new Map();
+      const puzzle = get(activePuzzleAtom);
+      if (!tab || !puzzle) return new Map();
       const engines = get(loadableEnginesAtom);
       if (!(engines.state === "hasData")) return new Map();
       const bestMoves = new Map<
@@ -237,7 +241,7 @@ export const bestMovesFamily = atomFamily(
       let n = 0;
       for (const engine of engines.data.filter((e) => e.loaded)) {
         const engineMoves = get(
-          engineMovesFamily({ tab, engine: engine.name })
+          engineMovesFamily({ tab, puzzle, engine: engine.name })
         );
         const [pos] = positionFromFen(fen);
         let finalFen = INITIAL_FEN;

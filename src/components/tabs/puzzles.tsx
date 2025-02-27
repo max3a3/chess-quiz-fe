@@ -7,7 +7,7 @@ import { match } from "ts-pattern";
 
 import { ChessStateContext } from "@/provider/chess-state-context";
 import { Completion, Puzzle, Status } from "@/utils/puzzles";
-import { currentPuzzleAtom } from "@/state/atoms";
+import { activePuzzleAtom } from "@/state/atoms";
 import { positionFromFen } from "@/utils/chessops";
 import PuzzleBoard from "@/components/puzzles/puzzle-board";
 import { getPuzzle } from "@/api/puzzles-api";
@@ -18,6 +18,7 @@ import PuzzleAnnotation from "@/components/puzzles/puzzle-annotation";
 import PuzzleStatus from "@/components/puzzles/puzzle-status";
 import PuzzleDashBoard from "@/components/puzzles/puzzle-dashboard";
 import EvalListener from "@/components/common/eval-listener";
+import { genID } from "@/lib/utils";
 
 const Puzzles = ({ id }: { id: string }) => {
   const store = useContext(ChessStateContext)!;
@@ -31,11 +32,11 @@ const Puzzles = ({ id }: { id: string }) => {
     `${id}-puzzles`,
     []
   );
-  const [currentPuzzle, setCurrentPuzzle] = useAtom(currentPuzzleAtom);
+  const [activePuzzle, setActivePuzzle] = useAtom(activePuzzleAtom);
 
   let puzzle: Puzzle | null = null;
   if (puzzles.length > 0) {
-    puzzle = puzzles[currentPuzzle];
+    puzzle = puzzles.find((puzzle) => puzzle.value === activePuzzle) ?? null;
   }
 
   const [currentStatus, setCurrentStatus] = useState<Status>("notstarted");
@@ -55,13 +56,14 @@ const Puzzles = ({ id }: { id: string }) => {
     getPuzzle().then((puzzle) => {
       const newPuzzle: Puzzle = {
         ...puzzle,
+        value: genID(),
         moves: puzzle.moves.split(" "),
         completion: "incomplete",
       };
       setPuzzles((puzzles) => {
         return [...puzzles, newPuzzle];
       });
-      setCurrentPuzzle(puzzles.length);
+      setActivePuzzle(newPuzzle.value);
       setPuzzle(newPuzzle);
     });
   }, []);
@@ -72,7 +74,7 @@ const Puzzles = ({ id }: { id: string }) => {
   }, []);
 
   async function viewSolution() {
-    const curPuzzle = puzzles[currentPuzzle];
+    const curPuzzle = puzzles.find((puzzle) => puzzle.value === activePuzzle)!;
     if (curPuzzle.completion !== "correct") {
       setCurrentStatus("incorrect-complete");
     }
@@ -93,8 +95,9 @@ const Puzzles = ({ id }: { id: string }) => {
 
   function changeCompletion(completion: Completion) {
     setPuzzles((puzzles) => {
-      puzzles[currentPuzzle].completion = completion;
-      return [...puzzles];
+      return puzzles.map((puzzle) =>
+        puzzle.value === activePuzzle ? { ...puzzle, completion } : puzzle
+      );
     });
   }
 
@@ -112,13 +115,15 @@ const Puzzles = ({ id }: { id: string }) => {
     .otherwise((node) => node.move?.to);
 
   const turnToMove =
-    puzzles[currentPuzzle] !== undefined
-      ? positionFromFen(puzzles[currentPuzzle]?.fen)[0]?.turn
+    puzzles.find((puzzle) => puzzle.value === activePuzzle) !== undefined
+      ? positionFromFen(
+          puzzles.find((puzzle) => puzzle.value === activePuzzle)!.fen
+        )[0]?.turn
       : undefined;
 
   useEffect(() => {
     changeStatus("notstarted");
-  }, [currentPuzzle]);
+  }, [activePuzzle]);
 
   useEffect(() => {
     if (!puzzle) return;
@@ -137,9 +142,9 @@ const Puzzles = ({ id }: { id: string }) => {
       <div className="flex gap-4 p-2 h-full">
         <div className="relative flex-1">
           <PuzzleBoard
-            key={currentPuzzle}
+            key={activePuzzle}
             puzzles={puzzles}
-            currentPuzzle={currentPuzzle}
+            activePuzzle={activePuzzle || ""}
             changeCompletion={changeCompletion}
             changeStatus={changeStatus}
             generatePuzzle={generatePuzzle}
@@ -162,6 +167,10 @@ const Puzzles = ({ id }: { id: string }) => {
           <div className="flex flex-col space-y-2 h-full overflow-hidden">
             <div className="h-full p-4 bg-primary rounded-md overflow-hidden">
               <PuzzleDashBoard
+                quizComplete={
+                  currentStatus === "correct-complete" ||
+                  currentStatus === "incorrect-complete"
+                }
                 turnToMove={turnToMove}
                 generatePuzzle={generatePuzzle}
                 clearSession={clearSession}
@@ -173,10 +182,10 @@ const Puzzles = ({ id }: { id: string }) => {
                   ...p,
                   label: p.rating.toString(),
                 }))}
-                current={currentPuzzle}
-                onSelect={(i) => {
-                  setCurrentPuzzle(i);
-                  setPuzzle(puzzles[i]);
+                active={activePuzzle || ""}
+                onSelect={(value) => {
+                  setActivePuzzle(value);
+                  setPuzzle(puzzles.find((puzzle) => puzzle.value === value)!);
                 }}
               />
             </div>

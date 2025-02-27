@@ -7,28 +7,25 @@ import { Completion } from "@/utils/puzzles";
 type History = {
   completion: Completion;
   label?: string;
+  value: string;
 };
 
 interface PuzzleHistoryProps {
   histories: History[];
-  onSelect: (index: number) => void;
-  current: number;
+  onSelect: (value: string) => void;
+  active: string;
 }
 
-const PuzzleHistory = ({
-  histories,
-  onSelect,
-  current,
-}: PuzzleHistoryProps) => {
+const PuzzleHistory = ({ histories, onSelect, active }: PuzzleHistoryProps) => {
   return (
     <div className="flex flex-wrap gap-4">
-      {histories.map((history, index) => {
-        const isCurrent = index === current;
+      {histories.map((history) => {
+        const isCurrent = history.value === active;
         return match(history.completion)
           .with("correct", () => (
-            <div key={index}>
+            <div key={history.value}>
               <div
-                onClick={() => onSelect(index)}
+                onClick={() => onSelect(history.value)}
                 className={cn(
                   "flex items-center justify-center size-7 rounded-md bg-[#203427]  border-[#008000] cursor-pointer hover:bg-opacity-80",
                   isCurrent && "border"
@@ -44,9 +41,9 @@ const PuzzleHistory = ({
           .when(
             (v) => v === "incorrect-complete" || v === "incorrect-incomplete",
             () => (
-              <div key={index}>
+              <div key={history.value}>
                 <div
-                  onClick={() => onSelect(index)}
+                  onClick={() => onSelect(history.value)}
                   className={cn(
                     "flex items-center justify-center size-7 rounded-md bg-[#3B2326]  border-[#FF0000] cursor-pointer hover:bg-opacity-80",
                     isCurrent && "border"
@@ -61,9 +58,9 @@ const PuzzleHistory = ({
             )
           )
           .with("incomplete", () => (
-            <div key={index} className="flex flex-col items-center">
+            <div key={history.value} className="flex flex-col items-center">
               <div
-                onClick={() => onSelect(index)}
+                onClick={() => onSelect(history.value)}
                 className={cn(
                   "flex items-center justify-center size-7 rounded-md bg-[#3B311B]  border-[#FFFF00] cursor-pointer hover:bg-opacity-80",
                   isCurrent && "border-2"

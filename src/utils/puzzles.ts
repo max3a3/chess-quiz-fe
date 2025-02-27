@@ -12,6 +12,7 @@ export type Status =
   | "notstarted";
 
 export interface Puzzle {
+  value: string;
   fen: string;
   moves: string[];
   rating: number;

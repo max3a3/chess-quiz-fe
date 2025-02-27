@@ -52,7 +52,7 @@ const arrowColors = [
 
 interface PuzzleBoardProps {
   puzzles: Puzzle[];
-  currentPuzzle: number;
+  activePuzzle: string;
   changeCompletion: (completion: Completion) => void;
   changeStatus: (status: Status) => void;
   generatePuzzle: () => void;
@@ -60,7 +60,7 @@ interface PuzzleBoardProps {
 
 const PuzzleBoard = ({
   puzzles,
-  currentPuzzle,
+  activePuzzle,
   changeCompletion,
   changeStatus,
   generatePuzzle,
@@ -105,7 +105,7 @@ const PuzzleBoard = ({
 
   let puzzle: Puzzle | null = null;
   if (puzzles.length > 0) {
-    puzzle = puzzles[currentPuzzle];
+    puzzle = puzzles.find((puzzle) => puzzle.value === activePuzzle) ?? null;
   }
 
   const [pos] = positionFromFen(currentNode.fen);

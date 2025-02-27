@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import {
+  activePuzzleAtom,
   activeTabAtom,
   currentThreatAtom,
   engineMovesFamily,
@@ -57,13 +58,18 @@ function BestMovesComponent({
   orientation,
 }: BestMovesProps) {
   const activeTab = useAtomValue(activeTabAtom);
+  const activePuzzle = useAtomValue(activePuzzleAtom);
   const ev = useAtomValue(
-    engineMovesFamily({ engine: engine.name, tab: activeTab! })
+    engineMovesFamily({
+      engine: engine.name,
+      tab: activeTab!,
+      puzzle: activePuzzle!,
+    })
   );
   const progress = useAtomValue(
     engineProgressFamily({ engine: engine.name, tab: activeTab! })
   );
-  const [, setEngines] = useAtom(enginesAtom);
+  const [engines, setEngines] = useAtom(enginesAtom);
   const [settings, setSettings2] = useAtom(
     tabEngineSettingsFamily({
       engineName: engine.name,
@@ -73,7 +79,6 @@ function BestMovesComponent({
     })
   );
   const setSelectedEngine = useSetAtom(selectedEngineAtom);
-  const [engines] = useAtom(enginesAtom);
   const loadedEngines = useMemo(
     () => engines.filter((e) => e.loaded),
     [engines]
@@ -152,7 +157,7 @@ function BestMovesComponent({
 
   return (
     <div className="pb-2 bg-zinc-800 rounded-md">
-      <div className="flex items-center justify-between gap-3 p-3">
+      <div className="flex items-center justify-between p-3">
         <div className="flex items-center">
           <EngineTrigger key={engine.name} engine={engine} />
           <Select
@@ -305,7 +310,7 @@ function EngineTop({
   const nps = isComputed ? formatNodes(engineVariations[0].nps) : 0;
 
   return (
-    <div className="flex justify-between flex-1">
+    <div className="flex justify-between flex-1 pr-3">
       <div className="flex items-center">
         {enabled && !isGameOver && !error && !engineVariations && (
           <div className="p-1 bg-primary rounded-md text-muted text-sm">

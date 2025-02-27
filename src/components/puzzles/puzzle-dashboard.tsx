@@ -19,12 +19,14 @@ import { getVariationLine } from "@/utils/chessops";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface PuzzleDashBoardProps {
+  quizComplete: boolean;
   turnToMove?: "white" | "black";
   generatePuzzle: () => void;
   clearSession: () => void;
 }
 
 const PuzzleDashBoard = ({
+  quizComplete,
   turnToMove,
   generatePuzzle,
   clearSession,
@@ -90,23 +92,25 @@ const PuzzleDashBoard = ({
         </div>
       </div>
       <div className="flex-1 overflow-hidden">
-        <ScrollArea
-          className="h-full"
-          onScroll={() =>
-            document.dispatchEvent(new Event("analysis-panel-scroll"))
-          }
-        >
-          {selectedEngine && (
-            <BestMoves
-              engine={selectedEngine}
-              fen={rootFen}
-              moves={moves}
-              halfMoves={currentNodeHalfMoves}
-              //임시로 black
-              orientation={headers.orientation || "black"}
-            />
-          )}
-        </ScrollArea>
+        {quizComplete && (
+          <ScrollArea
+            className="h-full"
+            onScroll={() =>
+              document.dispatchEvent(new Event("analysis-panel-scroll"))
+            }
+          >
+            {selectedEngine && (
+              <BestMoves
+                engine={selectedEngine}
+                fen={rootFen}
+                moves={moves}
+                halfMoves={currentNodeHalfMoves}
+                //임시로 black
+                orientation={headers.orientation || "black"}
+              />
+            )}
+          </ScrollArea>
+        )}
       </div>
     </div>
   );

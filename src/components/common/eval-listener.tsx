@@ -7,6 +7,7 @@ import { useStore } from "zustand";
 import { useShallow } from "zustand/react/shallow";
 
 import {
+  activePuzzleAtom,
   activeTabAtom,
   currentThreatAtom,
   engineMovesFamily,
@@ -40,7 +41,6 @@ function EvalListener() {
     for (const uci of moves) {
       const move = parseUci(uci);
       if (!move) {
-        console.log("Invalid move", uci);
         break;
       }
       pos.play(move);
@@ -109,13 +109,18 @@ function EngineListener({
   const root = useStore(store, (s) => s.root);
   const setScore = useStore(store, (s) => s.setScore);
   const activeTab = useAtomValue(activeTabAtom);
+  const activePuzzle = useAtomValue(activePuzzleAtom);
 
   const [, setProgress] = useAtom(
     engineProgressFamily({ engine: engine.name, tab: activeTab! })
   );
 
   const [, setEngineVariation] = useAtom(
-    engineMovesFamily({ engine: engine.name, tab: activeTab! })
+    engineMovesFamily({
+      engine: engine.name,
+      tab: activeTab!,
+      puzzle: activePuzzle!,
+    })
   );
   const [settings] = useAtom(
     tabEngineSettingsFamily({
@@ -149,6 +154,10 @@ function EngineListener({
       workerRef.current = null;
     };
   }, []);
+
+  useEffect(() => {
+    setProgress(0);
+  }, [activePuzzle]);
 
   //
   const handleCompute = () => {
