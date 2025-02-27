@@ -12,7 +12,6 @@ import ChessStateProvider from "@/provider/chess-state-context";
 import NewTabHome from "@/components/tabs/new-tab-home";
 import BoardGame from "@/components/tabs/board-game";
 import Puzzles from "@/components/tabs/puzzles";
-import Analysis from "@/components/tabs/analysis";
 
 export const Route = createFileRoute("/")({
   component: HomePage,
@@ -129,11 +128,6 @@ function TabSwitch({ tab }: { tab: Tab }) {
     .with("puzzles", () => (
       <ChessStateProvider id={tab.value}>
         <Puzzles id={tab.value} />
-      </ChessStateProvider>
-    ))
-    .with("analysis", () => (
-      <ChessStateProvider id={tab.value}>
-        <Analysis id={tab.value} />
       </ChessStateProvider>
     ))
     .exhaustive();

@@ -48,16 +48,14 @@ const ChessBoard = (
   }, [api, props.hintSelected]);
 
   return (
-    <div className="flex items-center gap-4 ">
-      <div
-        ref={boardRef}
-        style={{
-          //TODO: 동적 체스보드 배경이미지 설정
-          backgroundImage: "url(/board/wood4.jpg)",
-        }}
-        className="aspect-square w-full bg-center bg-cover rounded-md"
-      />
-    </div>
+    <div
+      ref={boardRef}
+      style={{
+        //TODO: 동적 체스보드 배경이미지 설정
+        backgroundImage: "url(/board/wood4.jpg)",
+      }}
+      className="aspect-square w-full bg-center bg-cover rounded-md"
+    />
   );
 };
 

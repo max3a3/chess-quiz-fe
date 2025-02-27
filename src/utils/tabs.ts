@@ -5,7 +5,7 @@ import { genID } from "@/lib/utils";
 export const tabSchema = z.object({
   name: z.string(),
   value: z.string(),
-  type: z.enum(["new", "play", "puzzles", "analysis"]),
+  type: z.enum(["new", "play", "puzzles"]),
   gameNumber: z.number().nullish(),
 });
 

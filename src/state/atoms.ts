@@ -108,6 +108,11 @@ export const scoreTypeFamily = atomFamily((_: string) =>
 );
 
 export const snapArrowsAtom = atomWithStorage<boolean>("snap-dests", true);
+export const showArrowsAtom = atomWithStorage<boolean>("show-arrows", true);
+export const showConsecutiveArrowsAtom = atomWithStorage<boolean>(
+  "show-consecutive-arrows",
+  false
+);
 export const jumpToNextPuzzleAtom = atomWithStorage<boolean>(
   "puzzle-jump-immediately",
   true
@@ -297,3 +302,6 @@ export const tabEngineSettingsFamily = atomFamily(
 
 const threatFamily = atomFamily((_: string) => atom(false));
 export const currentThreatAtom = tabValue(threatFamily);
+
+const evalOpenFamily = atomFamily((_: string) => atom(true));
+export const currentEvalOpenAtom = tabValue(evalOpenFamily);

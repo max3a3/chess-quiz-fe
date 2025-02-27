@@ -135,7 +135,7 @@ const Puzzles = ({ id }: { id: string }) => {
     <section className="h-full">
       <EvalListener />
       <div className="flex gap-4 p-2 h-full">
-        <div className="relative w-[800px] h-[800px]">
+        <div className="relative flex-1">
           <PuzzleBoard
             key={currentPuzzle}
             puzzles={puzzles}

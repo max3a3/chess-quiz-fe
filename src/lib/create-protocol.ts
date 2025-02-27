@@ -201,8 +201,7 @@ export function createProtocol(): Protocol {
 
   function compute(work: Work) {
     //임시
-    const [pos, error] = positionFromFen(work.currentFen);
-    console.log(error);
+    const [pos] = positionFromFen(work.currentFen);
     if (!pos) return;
     nextWork = work;
     stop();
