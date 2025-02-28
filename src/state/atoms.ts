@@ -129,6 +129,8 @@ export const moveNotationTypeAtom = atomWithStorage<"letters" | "symbols">(
   "symbols"
 );
 
+const BASE_ROOT = import.meta.env.DEV ? "/node_modules" : "/npm";
+
 const engines: Engine[] = [
   {
     type: "local",
@@ -139,7 +141,7 @@ const engines: Engine[] = [
     minMem: 1536,
     assets: {
       version: "sfw008",
-      root: "/node_modules/lila-stockfish-web",
+      root: BASE_ROOT + "/lila-stockfish-web",
       js: "sf16-7.js",
     },
     loaded: true,
@@ -161,7 +163,7 @@ const engines: Engine[] = [
     minMem: 2560,
     assets: {
       version: "sfw008",
-      root: "/node_modules/lila-stockfish-web",
+      root: BASE_ROOT + "/lila-stockfish-web",
       js: "sf16-7.js",
     },
     loaded: true,
@@ -184,7 +186,7 @@ const engines: Engine[] = [
     minMem: 1024,
     assets: {
       version: "a022fa",
-      root: "/node_modules/stockfish.wasm",
+      root: BASE_ROOT + "/stockfish.wasm",
       js: "stockfish.js",
       wasm: "stockfish.wasm",
     },
@@ -310,14 +312,14 @@ export const currentThreatAtom = tabValue(threatFamily);
 const evalOpenFamily = atomFamily((_: string) => atom(true));
 export const currentEvalOpenAtom = tabValue(evalOpenFamily);
 
-export const pieceSetAtom = atomWithStorage<string>("piece-set", "staunty");
+export const pieceSetAtom = atomWithStorage<string>("piece-set", "anarcandy");
 export const boardImageAtom = atomWithStorage<string>(
   "board-image",
-  "gray.svg"
+  "pink-pyramid.png"
 );
 export const soundCollectionAtom = atomWithStorage<string>(
   "sound-collection",
-  "standard",
+  "nes",
   undefined,
   {
     getOnInit: true,
