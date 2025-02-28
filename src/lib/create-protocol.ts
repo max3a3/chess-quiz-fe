@@ -28,6 +28,7 @@ export interface Work {
   initialFen: string;
   currentFen: string;
   moves: string[];
+  turn: "black" | "white";
   threat: boolean;
   eval?: EvalResult;
   emit?: (_eval: EvalResult) => void;
@@ -154,11 +155,13 @@ export function createProtocol(): Protocol {
     )
       return;
 
+    const ev = currentWork.turn === "black" ? -povEv : povEv;
+
     const bestMoves: BestMoves = {
       depth,
       nodes,
       score: {
-        value: { type: isMate ? "mate" : "cp", value: povEv },
+        value: { type: isMate ? "mate" : "cp", value: ev },
         wdl: null,
       },
       multipv,
@@ -200,9 +203,6 @@ export function createProtocol(): Protocol {
   }
 
   function compute(work: Work) {
-    //임시
-    const [pos] = positionFromFen(work.currentFen);
-    if (!pos) return;
     nextWork = work;
     stop();
     swapWork();

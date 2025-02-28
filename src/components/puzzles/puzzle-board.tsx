@@ -39,6 +39,7 @@ import { match } from "ts-pattern";
 import { Button } from "@/components/ui/button";
 import { ChevronRightIcon } from "lucide-react";
 import EvalBar from "@/components/analysis/eval-bar";
+import PuzzleAnnotation from "@/components/puzzles/puzzle-annotation";
 
 const LARGE_BRUSH = 11;
 const MEDIUM_BRUSH = 7.5;
@@ -122,6 +123,15 @@ const PuzzleBoard = ({
       }
     }
   }
+
+  const square = match(currentNode)
+    .with({ san: "O-O" }, ({ halfMoves }) =>
+      parseSquare(halfMoves % 2 === 1 ? "g1" : "g8")
+    )
+    .with({ san: "O-O-O" }, ({ halfMoves }) =>
+      parseSquare(halfMoves % 2 === 1 ? "c1" : "c8")
+    )
+    .otherwise((node) => node.move?.to);
 
   const orientation = puzzle?.fen
     ? Chess.fromSetup(parseFen(puzzle.fen).unwrap()).unwrap().turn === "white"
@@ -290,7 +300,7 @@ const PuzzleBoard = ({
         onMouseDown={() => {
           setShapes([]);
         }}
-        className="flex-1 h-0 pb-[100%] max-w-[770px]"
+        className="relative flex-1 h-0 pb-[100%] max-w-[770px]"
       >
         <PromotionModal
           pendingMove={pendingMove}
@@ -358,6 +368,17 @@ const PuzzleBoard = ({
           }}
           hintSelected={selected}
         />
+        {currentNode.completion && currentNode.move && square !== undefined && (
+          <div className="absolute inset-0 size-full pointer-events-none">
+            <div className="relative size-full">
+              <PuzzleAnnotation
+                orientation="black"
+                square={square}
+                completion={currentNode.completion}
+              />
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

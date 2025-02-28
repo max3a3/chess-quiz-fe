@@ -2,8 +2,7 @@ import { useCallback, useContext, useEffect, useState } from "react";
 import { useStore } from "zustand";
 import { useSessionStorage } from "usehooks-ts";
 import { useAtom } from "jotai/react";
-import { parseSquare, parseUci } from "chessops";
-import { match } from "ts-pattern";
+import { parseUci } from "chessops";
 
 import { ChessStateContext } from "@/provider/chess-state-context";
 import { Completion, Puzzle, Status } from "@/utils/puzzles";
@@ -14,7 +13,6 @@ import { getPuzzle } from "@/api/puzzles-api";
 import PuzzleHistory from "@/components/puzzles/puzzle-history";
 import GameNotation from "@/components/common/game-notation";
 import MoveControls from "@/components/common/move-controls";
-import PuzzleAnnotation from "@/components/puzzles/puzzle-annotation";
 import PuzzleStatus from "@/components/puzzles/puzzle-status";
 import PuzzleDashBoard from "@/components/puzzles/puzzle-dashboard";
 import EvalListener from "@/components/common/eval-listener";
@@ -26,7 +24,6 @@ const Puzzles = ({ id }: { id: string }) => {
   const goToStart = useStore(store, (s) => s.goToStart);
   const reset = useStore(store, (s) => s.reset);
   const makeMove = useStore(store, (s) => s.makeMove);
-  const currentNode = useStore(store, (s) => s.currentNode());
 
   const [puzzles, setPuzzles] = useSessionStorage<Puzzle[]>(
     `${id}-puzzles`,
@@ -105,15 +102,6 @@ const Puzzles = ({ id }: { id: string }) => {
     setCurrentStatus(status);
   }
 
-  const square = match(currentNode)
-    .with({ san: "O-O" }, ({ halfMoves }) =>
-      parseSquare(halfMoves % 2 === 1 ? "g1" : "g8")
-    )
-    .with({ san: "O-O-O" }, ({ halfMoves }) =>
-      parseSquare(halfMoves % 2 === 1 ? "c1" : "c8")
-    )
-    .otherwise((node) => node.move?.to);
-
   const turnToMove =
     puzzles.find((puzzle) => puzzle.value === activePuzzle) !== undefined
       ? positionFromFen(
@@ -149,19 +137,6 @@ const Puzzles = ({ id }: { id: string }) => {
             changeStatus={changeStatus}
             generatePuzzle={generatePuzzle}
           />
-          {currentNode.completion &&
-            currentNode.move &&
-            square !== undefined && (
-              <div className="absolute inset-0 size-full pointer-events-none">
-                <div className="relative size-full">
-                  <PuzzleAnnotation
-                    orientation="black"
-                    square={square}
-                    completion={currentNode.completion}
-                  />
-                </div>
-              </div>
-            )}
         </div>
         <div className="flex-1 flex flex-col space-y-2 h-full overflow-hidden">
           <div className="flex flex-col space-y-2 h-full overflow-hidden">
