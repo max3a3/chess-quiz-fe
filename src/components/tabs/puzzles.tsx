@@ -165,9 +165,9 @@ const Puzzles = ({ id }: { id: string }) => {
               />
             </div>
           </div>
-          <div className="flex gap-2 h-full">
+          <div className="flex gap-2 h-full overflow-hidden">
             <div className="flex flex-col space-y-2 flex-1">
-              <div className="flex-1">
+              <div className="flex-1 overflow-hidden">
                 <GameNotation />
               </div>
               <MoveControls readOnly />

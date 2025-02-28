@@ -1,3 +1,6 @@
+import { soundCollectionAtom, soundVolumeAtom } from "@/state/atoms";
+import { getDefaultStore } from "jotai";
+
 let lastTime = 0;
 
 export function playSound(capture: boolean, check: boolean) {
@@ -7,6 +10,10 @@ export function playSound(capture: boolean, check: boolean) {
   }
   lastTime = now;
 
+  const store = getDefaultStore();
+  const collection = store.get(soundCollectionAtom);
+  const volume = store.get(soundVolumeAtom);
+
   let type = "Move";
   if (capture) {
     type = "Capture";
@@ -15,7 +22,7 @@ export function playSound(capture: boolean, check: boolean) {
     type = "Check";
   }
 
-  const audio = new Audio(`/sound/robot/${type}.mp3`);
-  audio.volume = 1;
+  const audio = new Audio(`/sound/${collection}/${type}.mp3`);
+  audio.volume = volume;
   audio.play();
 }

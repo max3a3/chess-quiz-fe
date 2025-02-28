@@ -309,3 +309,25 @@ export const currentThreatAtom = tabValue(threatFamily);
 
 const evalOpenFamily = atomFamily((_: string) => atom(true));
 export const currentEvalOpenAtom = tabValue(evalOpenFamily);
+
+export const pieceSetAtom = atomWithStorage<string>("piece-set", "staunty");
+export const boardImageAtom = atomWithStorage<string>(
+  "board-image",
+  "gray.svg"
+);
+export const soundCollectionAtom = atomWithStorage<string>(
+  "sound-collection",
+  "standard",
+  undefined,
+  {
+    getOnInit: true,
+  }
+);
+export const soundVolumeAtom = atomWithStorage<number>(
+  "sound-volume",
+  0.8,
+  undefined,
+  {
+    getOnInit: true,
+  }
+);
