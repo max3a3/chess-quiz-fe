@@ -40,8 +40,6 @@ function CompleteMoveCell({
   const isWhite = halfMoves % 2 === 1;
   const hasNumber = isSubline && halfMoves > 0 && (first || isWhite);
 
-  //console.log(move, movePath);
-
   return (
     <div
       ref={isCurrentVariation ? targetRef : undefined}

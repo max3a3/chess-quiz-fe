@@ -9,5 +9,5 @@ export const Route = createRootRoute({
 });
 
 function App({ children }: { children: React.ReactNode }) {
-  return <>{children}</>;
+  return <div className="h-[100vh]">{children}</div>;
 }

@@ -1,25 +1,24 @@
-import { useContext } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import { useStore } from "zustand";
 import { useSessionStorage } from "usehooks-ts";
 import { useAtom } from "jotai/react";
 import { parseSquare, parseUci } from "chessops";
+import { match } from "ts-pattern";
 
 import { ChessStateContext } from "@/provider/chess-state-context";
-import { Completion, Puzzle } from "@/utils/puzzles";
-import { currentPuzzleAtom, jumpToNextPuzzleAtom } from "@/state/atoms";
+import { Completion, Puzzle, Status } from "@/utils/puzzles";
+import { activePuzzleAtom } from "@/state/atoms";
 import { positionFromFen } from "@/utils/chessops";
 import PuzzleBoard from "@/components/puzzles/puzzle-board";
 import { getPuzzle } from "@/api/puzzles-api";
-import { Button } from "@/components/ui/button";
-import { PlusIcon, XIcon } from "lucide-react";
-import ActionTooltip from "@/components/ui/action-tooltip";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
 import PuzzleHistory from "@/components/puzzles/puzzle-history";
 import GameNotation from "@/components/common/game-notation";
 import MoveControls from "@/components/common/move-controls";
-import { match } from "ts-pattern";
 import PuzzleAnnotation from "@/components/puzzles/puzzle-annotation";
+import PuzzleStatus from "@/components/puzzles/puzzle-status";
+import PuzzleDashBoard from "@/components/puzzles/puzzle-dashboard";
+import EvalListener from "@/components/common/eval-listener";
+import { genID } from "@/lib/utils";
 
 const Puzzles = ({ id }: { id: string }) => {
   const store = useContext(ChessStateContext)!;
@@ -33,34 +32,54 @@ const Puzzles = ({ id }: { id: string }) => {
     `${id}-puzzles`,
     []
   );
-  const [currentPuzzle, setCurrentPuzzle] = useAtom(currentPuzzleAtom);
-  const [jumpToNextPuzzleImmediately, setJumpToNextPuzzleImmediately] =
-    useAtom(jumpToNextPuzzleAtom);
+  const [activePuzzle, setActivePuzzle] = useAtom(activePuzzleAtom);
 
-  function setPuzzle(puzzle: { fen: string; moves: string[] }) {
+  let puzzle: Puzzle | null = null;
+  if (puzzles.length > 0) {
+    puzzle = puzzles.find((puzzle) => puzzle.value === activePuzzle) ?? null;
+  }
+
+  const [currentStatus, setCurrentStatus] = useState<Status>("notstarted");
+
+  async function setPuzzle(puzzle: { fen: string; moves: string[] }) {
     setFen(puzzle.fen);
+    makeMove({
+      payload: parseUci(puzzle.moves[0])!,
+      changePosition: false,
+      sound: false,
+    });
+    await new Promise((r) => setTimeout(r, 100));
     makeMove({ payload: parseUci(puzzle.moves[0])! });
   }
 
-  function generatePuzzle() {
+  const generatePuzzle = useCallback(() => {
     getPuzzle().then((puzzle) => {
       const newPuzzle: Puzzle = {
         ...puzzle,
+        value: genID(),
         moves: puzzle.moves.split(" "),
         completion: "incomplete",
       };
       setPuzzles((puzzles) => {
         return [...puzzles, newPuzzle];
       });
-      setCurrentPuzzle(puzzles.length);
+      setActivePuzzle(newPuzzle.value);
       setPuzzle(newPuzzle);
     });
-  }
+  }, []);
+
+  const clearSession = useCallback(() => {
+    setPuzzles([]);
+    reset();
+  }, []);
 
   async function viewSolution() {
-    const curPuzzle = puzzles[currentPuzzle];
+    const curPuzzle = puzzles.find((puzzle) => puzzle.value === activePuzzle)!;
+    if (curPuzzle.completion !== "correct") {
+      setCurrentStatus("incorrect-complete");
+    }
     if (curPuzzle.completion === "incomplete") {
-      changeCompletion("incorrect");
+      changeCompletion("incorrect-complete");
     }
     goToStart();
     for (let i = 0; i < curPuzzle.moves.length; i++) {
@@ -76,9 +95,14 @@ const Puzzles = ({ id }: { id: string }) => {
 
   function changeCompletion(completion: Completion) {
     setPuzzles((puzzles) => {
-      puzzles[currentPuzzle].completion = completion;
-      return [...puzzles];
+      return puzzles.map((puzzle) =>
+        puzzle.value === activePuzzle ? { ...puzzle, completion } : puzzle
+      );
     });
+  }
+
+  function changeStatus(status: Status) {
+    setCurrentStatus(status);
   }
 
   const square = match(currentNode)
@@ -91,25 +115,44 @@ const Puzzles = ({ id }: { id: string }) => {
     .otherwise((node) => node.move?.to);
 
   const turnToMove =
-    puzzles[currentPuzzle] !== undefined
-      ? positionFromFen(puzzles[currentPuzzle]?.fen)[0]?.turn
-      : null;
+    puzzles.find((puzzle) => puzzle.value === activePuzzle) !== undefined
+      ? positionFromFen(
+          puzzles.find((puzzle) => puzzle.value === activePuzzle)!.fen
+        )[0]?.turn
+      : undefined;
+
+  useEffect(() => {
+    changeStatus("notstarted");
+  }, [activePuzzle]);
+
+  useEffect(() => {
+    if (!puzzle) return;
+    if (puzzle.completion === "incorrect-complete")
+      changeStatus("incorrect-complete");
+    else if (puzzle.completion === "correct") changeStatus("correct-complete");
+  }, [puzzle]);
+
+  useEffect(() => {
+    if (puzzles.length === 0) generatePuzzle();
+  }, [puzzles]);
 
   return (
-    <section>
-      <div className="flex gap-4 p-2">
-        <div className="relative">
+    <section className="h-full">
+      <EvalListener />
+      <div className="flex gap-4 p-2 h-full">
+        <div className="relative flex-1">
           <PuzzleBoard
-            key={currentPuzzle}
+            key={activePuzzle}
             puzzles={puzzles}
-            currentPuzzle={currentPuzzle}
+            activePuzzle={activePuzzle || ""}
             changeCompletion={changeCompletion}
+            changeStatus={changeStatus}
             generatePuzzle={generatePuzzle}
           />
           {currentNode.completion &&
             currentNode.move &&
             square !== undefined && (
-              <div className="absolute inset-0 size-full">
+              <div className="absolute inset-0 size-full pointer-events-none">
                 <div className="relative size-full">
                   <PuzzleAnnotation
                     orientation="black"
@@ -120,85 +163,47 @@ const Puzzles = ({ id }: { id: string }) => {
               </div>
             )}
         </div>
-        <div className="flex flex-col space-y-2 flex-1">
-          <div className="space-y-3 p-4 bg-primary rounded-md">
-            <div className="flex justify-between items-center">
-              {turnToMove && (
-                <h4 className="font-semibold text-2xl text-muted">
-                  {turnToMove === "white" ? "Black " : "White "}
-                  To Move
-                </h4>
-              )}
-              <div className="flex items-center gap-1">
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    checked={jumpToNextPuzzleImmediately}
-                    onCheckedChange={(checked) =>
-                      setJumpToNextPuzzleImmediately(checked)
-                    }
-                    id="jump-to-next-puzzle-immediately"
-                    className="data-[state=checked]:bg-slate-700"
-                  />
-                  <Label
-                    htmlFor="jump-to-next-puzzle-immediately"
-                    className="text-muted"
-                  >
-                    Jump to next puzzle immediately
-                  </Label>
-                </div>
-                <ActionTooltip label="New Puzzle">
-                  <Button
-                    variant="default"
-                    onClick={generatePuzzle}
-                    size="icon"
-                  >
-                    <PlusIcon className="text-muted" />
-                  </Button>
-                </ActionTooltip>
-                <ActionTooltip label="Clear Session">
-                  <Button
-                    variant="default"
-                    onClick={() => {
-                      setPuzzles([]);
-                      reset();
-                    }}
-                    size="icon"
-                  >
-                    <XIcon className="text-muted" />
-                  </Button>
-                </ActionTooltip>
-              </div>
+        <div className="flex-1 flex flex-col space-y-2 h-full overflow-hidden">
+          <div className="flex flex-col space-y-2 h-full overflow-hidden">
+            <div className="h-full p-4 bg-primary rounded-md overflow-hidden">
+              <PuzzleDashBoard
+                quizComplete={
+                  currentStatus === "correct-complete" ||
+                  currentStatus === "incorrect-complete"
+                }
+                turnToMove={turnToMove}
+                generatePuzzle={generatePuzzle}
+                clearSession={clearSession}
+              />
             </div>
-            <Button
-              variant="secondary"
-              disabled={puzzles.length === 0}
-              onClick={viewSolution}
-            >
-              View Solution
-            </Button>
-          </div>
-          <div className="flex flex-col space-y-2 h-full">
             <div className="p-4 bg-primary rounded-md">
               <PuzzleHistory
                 histories={puzzles.map((p) => ({
                   ...p,
                   label: p.rating.toString(),
                 }))}
-                current={currentPuzzle}
-                onSelect={(i) => {
-                  setCurrentPuzzle(i);
-                  setPuzzle(puzzles[i]);
+                active={activePuzzle || ""}
+                onSelect={(value) => {
+                  setActivePuzzle(value);
+                  setPuzzle(puzzles.find((puzzle) => puzzle.value === value)!);
                 }}
               />
             </div>
-            <div className="flex gap-2 flex-1">
-              <div className="flex flex-col space-y-2 flex-1">
-                <div className="flex-1">
-                  <GameNotation />
-                </div>
-                <MoveControls readOnly />
+          </div>
+          <div className="flex gap-2 h-full">
+            <div className="flex flex-col space-y-2 flex-1">
+              <div className="flex-1">
+                <GameNotation />
               </div>
-              <div className="w-1/4"></div>
+              <MoveControls readOnly />
+            </div>
+            <div className="w-1/4">
+              <PuzzleStatus
+                status={currentStatus}
+                turnToMove={turnToMove}
+                viewSolution={viewSolution}
+                generatePuzzle={generatePuzzle}
+              />
             </div>
           </div>
         </div>

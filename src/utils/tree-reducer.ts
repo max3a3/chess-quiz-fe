@@ -13,6 +13,7 @@ export interface TreeState {
   headers: GameHeaders;
   position: number[];
   dirty: boolean;
+  showHint: boolean;
 }
 
 export interface TreeNode {
@@ -95,6 +96,7 @@ export function defaultTree(fen?: string): TreeState {
 
   return {
     dirty: false,
+    showHint: false,
     position: [],
     root: {
       fen: fen?.trim() ?? INITIAL_FEN,

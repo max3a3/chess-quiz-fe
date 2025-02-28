@@ -18,45 +18,34 @@ export default function PuzzleAnnotation({
 
   return (
     <div
+      className="absolute w-[12.5%] h-[12.5%]"
       style={{
-        position: "absolute",
-        width: "12.5%",
-        height: "12.5%",
         left: `${(file - 1) * 12.5}%`,
         bottom: `${(rank - 1) * 12.5}%`,
       }}
     >
-      <div>
-        {
-          <div
-            style={{
-              transform: "translateY(-40%) translateX(-50%)",
-              zIndex: 100,
-              filter: "url(#shadow)",
-              overflow: "initial",
-              borderRadius: "50%",
-              width: "45%",
-              height: "45%",
-              position: "absolute",
-              backgroundColor: color,
-            }}
-          >
-            <svg viewBox="0 0 100 100">
-              <title>{completion}</title>
-              <defs>
-                <filter id="shadow">
-                  <feDropShadow
-                    dx="0"
-                    dy="1"
-                    floodOpacity="0.3"
-                    stdDeviation="0"
-                  />
-                </filter>
-              </defs>
-              <g>{glyphToSvg[completion]}</g>
-            </svg>
-          </div>
-        }
+      <div className="pl-[90%]">
+        <div
+          className="z-[100] absolute w-[45%] h-[45%] shadow-md rounded-full -translate-x-1/2 -translate-y-[40%]"
+          style={{
+            backgroundColor: color,
+          }}
+        >
+          <svg viewBox="0 0 100 100">
+            <title>{completion}</title>
+            <defs>
+              <filter id="shadow">
+                <feDropShadow
+                  dx="0"
+                  dy="1"
+                  floodOpacity="0.3"
+                  stdDeviation="0"
+                />
+              </filter>
+            </defs>
+            <g>{glyphToSvg[completion]}</g>
+          </svg>
+        </div>
       </div>
     </div>
   );
