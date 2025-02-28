@@ -75,7 +75,7 @@ function HomePage() {
     <Tabs
       value={activeTab || undefined}
       onValueChange={(value) => setActiveTab(value)}
-      className="flex flex-col space-y-3 pt-4 px-4 h-full"
+      className="flex flex-col pt-4 px-4 h-full"
     >
       <div className="flex gap-2">
         {tabs.map((tab) => (
@@ -108,7 +108,7 @@ function HomePage() {
         <TabsContent
           key={tab.value}
           value={tab.value}
-          className="h-full focus:outline-none overflow-hidden"
+          className="mt-0 pt-3 h-full focus:outline-none overflow-hidden"
         >
           <TabSwitch tab={tab} />
         </TabsContent>

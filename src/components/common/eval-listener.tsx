@@ -163,6 +163,8 @@ function EngineListener({
   const handleCompute = () => {
     if (!workerRef.current) return;
     const { protocol } = workerRef.current;
+    const [pos] = positionFromFen(threat ? searchingFen : finalFen);
+    if (!pos) return;
     const work: Work = {
       stopRequested: false,
       search: match(settings.go)
@@ -175,6 +177,7 @@ function EngineListener({
       hashSize: typeof hashSize?.value === "number" ? hashSize.value : 16,
       multiPv: typeof multiPv?.value === "number" ? multiPv.value : 1,
       currentFen: threat ? searchingFen : finalFen,
+      turn: pos.turn,
       moves: searchingMoves,
       threat,
       emit: (result?) => {

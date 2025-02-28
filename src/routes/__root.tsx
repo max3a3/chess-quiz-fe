@@ -1,13 +1,17 @@
+import SideBar from "@/components/side-bar";
 import { createRootRoute, Outlet } from "@tanstack/react-router";
 
 export const Route = createRootRoute({
-  component: () => (
-    <App>
-      <Outlet />
-    </App>
-  ),
+  component: RootLayout,
 });
 
-function App({ children }: { children: React.ReactNode }) {
-  return <div className="h-[100vh]">{children}</div>;
+function RootLayout() {
+  return (
+    <div className="flex h-[100vh]">
+      <SideBar />
+      <main className="flex-1">
+        <Outlet />
+      </main>
+    </div>
+  );
 }

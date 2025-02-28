@@ -38,7 +38,7 @@ async function createThreadEngine(engineInfo: LocalEngine) {
     const { root, js, version: pathVersion } = engineInfo.assets;
     const moduleUrl = `${root}/${js}`;
 
-    await loadIife(moduleUrl, { pathVersion });
+    await loadIife(/* @vite-ignore */ moduleUrl, { pathVersion });
 
     const module = await window["Stockfish"]!({
       printErr: (msg: string) => {
@@ -71,7 +71,10 @@ async function createStockFishWebEngine(engineInfo: LocalEngine) {
     const { root, js, version: pathVersion } = engineInfo.assets;
 
     const makeModule = await import(
-      url(`${root}/${js}`, { pathVersion, documentOrigin: true })
+      url(/* @vite-ignore */ `${root}/${js}`, {
+        pathVersion,
+        documentOrigin: true,
+      })
     );
 
     const module: StockfishWeb = await makeModule.default({

@@ -3,6 +3,8 @@ import { Chessground } from "chessground";
 import { Api } from "chessground/api";
 import { Config } from "chessground/config";
 import { SquareName } from "chessops";
+import { useAtomValue } from "jotai";
+import { boardImageAtom } from "@/state/atoms";
 
 const ChessBoard = (
   props: Config & {
@@ -47,12 +49,13 @@ const ChessBoard = (
     api.selectSquare(props.hintSelected);
   }, [api, props.hintSelected]);
 
+  const boardImage = useAtomValue(boardImageAtom);
+
   return (
     <div
       ref={boardRef}
       style={{
-        //TODO: 동적 체스보드 배경이미지 설정
-        backgroundImage: "url(/board/wood4.jpg)",
+        backgroundImage: `url(/board/${boardImage})`,
       }}
       className="aspect-square w-full bg-center bg-cover rounded-md"
     />
