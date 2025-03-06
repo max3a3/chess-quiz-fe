@@ -77,14 +77,14 @@ const AnalysisRow = ({
   return (
     <>
       <TableRow className="align-top hover:bg-transparent">
-        <TableCell width={70} className="align-baseline">
+        <TableCell width={70} className="align-baseline p-2">
           <ScoreBubble size="md" score={score} evalDisplay={evalDisplay} />
         </TableCell>
-        <TableCell className="align-baseline">
+        <TableCell className="align-baseline p-2">
           <div
             className="flex flex-wrap items-center overflow-hidden"
             style={{
-              height: open ? "100%" : 28,
+              height: open ? "100%" : 32,
             }}
           >
             {moveInfo.map(({ san, fen, lastMove, isCheck }, index) => (
@@ -107,7 +107,7 @@ const AnalysisRow = ({
             ))}
           </div>
         </TableCell>
-        <TableCell className="w-2.5 align-baseline">
+        <TableCell className="w-2.5 align-baseline p-2">
           <Button
             style={{
               transition: "transform 200ms ease",
@@ -163,7 +163,7 @@ function BoardPopover({
       <div
         onMouseEnter={() => setHovering(true)}
         onMouseLeave={() => setHovering(false)}
-        className="text-sm text-muted/70"
+        className="flex items-center h-8 text-sm text-white/70"
       >
         {(index === 0 || is_white) &&
           `${move_number.toString()}${is_white ? "." : "..."}`}
@@ -178,6 +178,7 @@ function BoardPopover({
             }
           }}
           isSubline={true}
+          isWhite={is_white}
         />
       </div>
       {preview && hovering && (

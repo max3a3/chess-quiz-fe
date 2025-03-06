@@ -462,7 +462,10 @@ export const createChessStore = (id?: string, initialTree?: TreeState) => {
             // Move to end
             const endPosition: number[] = [];
             let currentNode = state.root;
-            while (currentNode.children.length > 0) {
+            while (
+              currentNode.children.length > 0 &&
+              currentNode.children[0].completion !== "incorrect"
+            ) {
               endPosition.push(0);
               currentNode = currentNode.children[0];
             }

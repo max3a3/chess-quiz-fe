@@ -6,17 +6,19 @@ import { parseUci } from "chessops";
 
 import { ChessStateContext } from "@/provider/chess-state-context";
 import { Completion, Puzzle, Status } from "@/utils/puzzles";
-import { activePuzzleAtom } from "@/state/atoms";
+import { activePuzzleAtom, jumpToNextPuzzleAtom } from "@/state/atoms";
 import { positionFromFen } from "@/utils/chessops";
 import PuzzleBoard from "@/components/puzzles/puzzle-board";
 import { getPuzzle } from "@/api/puzzles-api";
-import PuzzleHistory from "@/components/puzzles/puzzle-history";
-import GameNotation from "@/components/common/game-notation";
-import MoveControls from "@/components/common/move-controls";
-import PuzzleStatus from "@/components/puzzles/puzzle-status";
 import PuzzleDashBoard from "@/components/puzzles/puzzle-dashboard";
 import EvalListener from "@/components/common/eval-listener";
 import { genID } from "@/lib/utils";
+import PuzzleEngine from "@/components/puzzles/puzzle-engine";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import PuzzleHistory from "@/components/puzzles/puzzle-history";
+import { Button } from "@/components/ui/button";
+import { Trash2 } from "lucide-react";
 
 const Puzzles = ({ id }: { id: string }) => {
   const store = useContext(ChessStateContext)!;
@@ -30,6 +32,8 @@ const Puzzles = ({ id }: { id: string }) => {
     []
   );
   const [activePuzzle, setActivePuzzle] = useAtom(activePuzzleAtom);
+  const [jumpToNextPuzzleImmediately, setJumpToNextPuzzleImmediately] =
+    useAtom(jumpToNextPuzzleAtom);
 
   let puzzle: Puzzle | null = null;
   if (puzzles.length > 0) {
@@ -125,33 +129,26 @@ const Puzzles = ({ id }: { id: string }) => {
   }, [puzzles]);
 
   return (
-    <section className="h-full">
+    <section className="grid grid-cols-2 gap-4 h-full">
       <EvalListener />
-      <div className="flex gap-4 p-2 h-full">
-        <div className="relative flex-1">
-          <PuzzleBoard
-            key={activePuzzle}
-            puzzles={puzzles}
-            activePuzzle={activePuzzle || ""}
-            changeCompletion={changeCompletion}
-            changeStatus={changeStatus}
-            generatePuzzle={generatePuzzle}
-          />
-        </div>
-        <div className="flex-1 flex flex-col space-y-2 h-full overflow-hidden">
-          <div className="flex flex-col space-y-2 h-full overflow-hidden">
-            <div className="h-full p-4 bg-primary rounded-md overflow-hidden">
-              <PuzzleDashBoard
-                quizComplete={
-                  currentStatus === "correct-complete" ||
-                  currentStatus === "incorrect-complete"
-                }
-                turnToMove={turnToMove}
-                generatePuzzle={generatePuzzle}
-                clearSession={clearSession}
-              />
-            </div>
-            <div className="p-4 bg-primary rounded-md">
+      <PuzzleBoard
+        key={activePuzzle}
+        puzzles={puzzles}
+        activePuzzle={activePuzzle || ""}
+        changeCompletion={changeCompletion}
+        changeStatus={changeStatus}
+        generatePuzzle={generatePuzzle}
+      />
+      <div className="grid grid-cols-2 gap-4 h-full overflow-hidden">
+        <PuzzleDashBoard
+          status={currentStatus}
+          turnToMove={turnToMove}
+          viewSolution={viewSolution}
+          generatePuzzle={generatePuzzle}
+        />
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <div className="bg-main-box rounded-[10px]">
               <PuzzleHistory
                 histories={puzzles.map((p) => ({
                   ...p,
@@ -164,22 +161,46 @@ const Puzzles = ({ id }: { id: string }) => {
                 }}
               />
             </div>
+            <div className="flex items-center px-6 py-4 bg-main-box rounded-[10px]">
+              <span className="inline-block flex-1 text-sm text-white">
+                Rating
+              </span>
+              <span className="inline-block flex-1 text-lg text-white">
+                {puzzle?.rating}
+              </span>
+            </div>
+            <PuzzleEngine
+              quizComplete={
+                currentStatus === "correct-complete" ||
+                currentStatus === "incorrect-complete"
+              }
+            />
           </div>
-          <div className="flex gap-2 h-full overflow-hidden">
-            <div className="flex flex-col space-y-2 flex-1">
-              <div className="flex-1 overflow-hidden">
-                <GameNotation />
-              </div>
-              <MoveControls readOnly />
-            </div>
-            <div className="w-1/4">
-              <PuzzleStatus
-                status={currentStatus}
-                turnToMove={turnToMove}
-                viewSolution={viewSolution}
-                generatePuzzle={generatePuzzle}
-              />
-            </div>
+          <div className="flex items-center justify-between">
+            <Label
+              htmlFor="jump-to-next-puzzle-immediately"
+              className="text-white text-sm"
+            >
+              Jump to next puzzle immediately
+            </Label>
+            <Switch
+              checked={jumpToNextPuzzleImmediately}
+              onCheckedChange={(checked) =>
+                setJumpToNextPuzzleImmediately(checked)
+              }
+              id="jump-to-next-puzzle-immediately"
+              className="bg-main-box data-[state=checked]:bg-[#559167]"
+            />
+          </div>
+          <div className="flex items-center justify-between">
+            <Label className="text-white text-sm">Clear session</Label>
+            <Button
+              size="icon"
+              className="size-9 bg-transparent opacity-70 transition-opacity hover:bg-transparent hover:opacity-100"
+              onClick={clearSession}
+            >
+              <Trash2 className="size-5" />
+            </Button>
           </div>
         </div>
       </div>

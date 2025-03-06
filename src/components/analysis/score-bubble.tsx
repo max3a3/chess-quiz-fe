@@ -19,14 +19,14 @@ const ScoreBubble = ({
       className={cn(
         "p-1 rounded-sm shadow-md text-center",
         score.value.value >= 0 ? "bg-gray-100" : "bg-black",
-        size === "md" ? "w-16 h-7" : "w-14 h-6"
+        size === "md" ? "w-14 h-7" : "w-12 h-6"
       )}
     >
       <span
         className={cn(
           "font-bold text-center",
           score.value.value >= 0 ? "text-black" : "text-white",
-          size === "md" ? "text-base" : "text-sm"
+          size === "md" ? "text-sm" : "text-xs"
         )}
       >
         {formatScore(score.value)}

@@ -10,9 +10,9 @@ import { viteStaticCopy } from "vite-plugin-static-copy";
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
+    TanStackRouterVite({ autoCodeSplitting: true }),
     react(),
     vanillaExtractPlugin(),
-    TanStackRouterVite({ autoCodeSplitting: true }),
     wasm(),
     topLevelAwait(),
     viteStaticCopy({

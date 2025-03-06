@@ -1,9 +1,8 @@
 import { useContext } from "react";
 import { useStore } from "zustand";
 import { match } from "ts-pattern";
-import { IconCheck, IconX } from "@tabler/icons-react";
+import { LightbulbIcon } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
 import { Status } from "@/utils/puzzles";
 import { cn } from "@/lib/utils";
 import { ChessStateContext } from "@/provider/chess-state-context";
@@ -26,120 +25,118 @@ const PuzzleStatus = ({
   const toggleHint = useStore(store, (s) => s.toggleHint);
 
   return (
-    <div className="h-full p-4 rounded-md bg-primary">
+    <div className="space-y-7 px-7">
       {match(status)
         .with("notstarted", () => (
-          <div className="flex flex-col justify-center h-full gap-6">
-            <div>
-              <h5 className="font-semibold text-xl text-muted">내 차례</h5>
-              <p className="font-medium text-sm text-muted">
-                {turnToMove === "white" ? "흑" : "백"}의 최선 수를 찾아보세요.
-              </p>
-            </div>
-            <div className="space-y-2">
-              <Button
-                variant="secondary"
+          <>
+            <div className="flex justify-center items-center gap-3 h-8">
+              <span
                 className={cn(
-                  "w-full font-semibold",
-                  showHint && "bg-blue-500 text-muted hover:bg-blue-500"
+                  "text-2xl",
+                  turnToMove === "white" ? "text-piece-black" : "text-white"
+                )}
+              >
+                ♖
+              </span>
+              <span className="text-sm text-white">
+                {turnToMove === "white" ? "Black " : "White "}turn
+              </span>
+            </div>
+            <div className="flex gap-3">
+              <button
+                className={cn(
+                  "flex items-center justify-center gap-2 py-3 w-full bg-main-button rounded-full transition-colors hover:bg-opacity-80",
+                  showHint && "bg-main-container"
                 )}
                 onClick={toggleHint}
               >
-                힌트보기
-              </Button>
-              <Button
-                variant="secondary"
-                className="w-full font-semibold"
+                <LightbulbIcon className="size-4 text-white" />
+                <span className="text-sm text-white">Hint</span>
+              </button>
+              <button
+                className="flex items-center justify-center gap-2 py-3 w-full bg-main-button rounded-full transition-colors hover:bg-opacity-80"
                 onClick={viewSolution}
               >
-                정답보기
-              </Button>
+                <span className="text-sm text-white">Answer</span>
+              </button>
             </div>
-          </div>
+          </>
         ))
         .with("correct", () => (
-          <div className="flex flex-col justify-center h-full gap-6">
-            <div>
-              <IconCheck color="green" size={32} />
-              <h5 className="font-semibold text-xl text-muted">
-                가장 좋은 수입니다!
-              </h5>
-              <p className="font-medium text-sm text-muted">계속하세요...</p>
-            </div>
-            <div className="space-y-2">
-              <Button
-                variant="secondary"
+          <>
+            <h5 className="h-8 text-sm text-white text-center leading-loose">
+              Best move!
+            </h5>
+            <div className="flex gap-3">
+              <button
                 className={cn(
-                  "w-full font-semibold",
-                  showHint && "bg-blue-500 text-muted hover:bg-blue-500"
+                  "flex items-center justify-center gap-2 py-3 w-full bg-main-button rounded-full transition-colors hover:bg-opacity-80",
+                  showHint && "bg-main-container"
                 )}
                 onClick={toggleHint}
               >
-                힌트보기
-              </Button>
-              <Button
-                variant="secondary"
-                className="w-full font-semibold"
+                <LightbulbIcon className="size-4 text-white" />
+                <span className="text-sm text-white">Hint</span>
+              </button>
+              <button
+                className="flex items-center justify-center gap-2 py-3 w-full bg-main-button rounded-full transition-colors hover:bg-opacity-80"
                 onClick={viewSolution}
               >
-                정답보기
-              </Button>
+                <span className="text-sm text-white">Answer</span>
+              </button>
             </div>
-          </div>
+          </>
         ))
         .with("incorrect", () => (
-          <div className="flex flex-col justify-center h-full gap-6">
-            <div>
-              <IconX color="red" size={32} />
-              <h5 className="font-semibold text-xl text-muted">
-                그 수가 아닙니다!
-              </h5>
-              <p className="font-medium text-sm text-muted">다른 것 시도하기</p>
-            </div>
-            <div className="space-y-2">
-              <Button
-                variant="secondary"
+          <>
+            <h5 className="h-8 text-sm text-white text-center leading-loose">
+              Incorrect move.
+            </h5>
+            <div className="flex gap-3">
+              <button
                 className={cn(
-                  "w-full font-semibold",
-                  showHint && "bg-blue-500 text-muted hover:bg-blue-500"
+                  "flex items-center justify-center gap-2 py-3 w-full bg-main-button rounded-full transition-colors hover:bg-opacity-80",
+                  showHint && "bg-main-container"
                 )}
                 onClick={toggleHint}
               >
-                힌트보기
-              </Button>
-              <Button
-                variant="secondary"
-                className="w-full font-semibold"
+                <LightbulbIcon className="size-4 text-white" />
+                <span className="text-sm text-white">Hint</span>
+              </button>
+              <button
+                className="flex items-center justify-center gap-2 py-3 w-full bg-main-button rounded-full transition-colors hover:bg-opacity-80"
                 onClick={viewSolution}
               >
-                정답보기
-              </Button>
+                <span className="text-sm text-white">Answer</span>
+              </button>
             </div>
-          </div>
+          </>
         ))
         .with("correct-complete", () => (
-          <div className="flex flex-col justify-center h-full gap-6">
-            <h5 className="font-semibold text-xl text-muted">성공!</h5>
-            <Button
-              variant="secondary"
-              className="w-full px-0 font-semibold"
+          <>
+            <h5 className="h-8 text-sm text-white text-center leading-loose">
+              Puzzle Success!
+            </h5>
+            <button
+              className="flex items-center justify-center gap-2 py-3 w-full bg-main-button rounded-full transition-colors hover:bg-opacity-80"
               onClick={generatePuzzle}
             >
-              연습 계속하기
-            </Button>
-          </div>
+              <span className="text-sm text-white">Continue</span>
+            </button>
+          </>
         ))
         .with("incorrect-complete", () => (
-          <div className="flex flex-col justify-center h-full gap-6">
-            <h5 className="font-semibold text-xl text-muted">퍼즐 완료!</h5>
-            <Button
-              variant="secondary"
-              className="w-full px-0 font-semibold"
+          <>
+            <h5 className="h-8 text-sm text-white text-center leading-loose">
+              Puzzle Complete!
+            </h5>
+            <button
+              className="flex items-center justify-center gap-2 py-3 w-full bg-main-button rounded-full transition-colors hover:bg-opacity-80"
               onClick={generatePuzzle}
             >
-              연습 계속하기
-            </Button>
-          </div>
+              <span className="text-sm text-white">Continue</span>
+            </button>
+          </>
         ))
         .exhaustive()}
     </div>

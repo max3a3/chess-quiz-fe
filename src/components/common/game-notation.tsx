@@ -26,7 +26,10 @@ const GameNotation = () => {
       if (currentPosition.length === 0) {
         scrollRef.current.scrollTo({ top: 0 });
       } else if (targetRef.current) {
-        targetRef.current.scrollIntoView();
+        scrollRef.current.scrollTo({
+          top: targetRef.current.offsetTop - 65,
+          behavior: "smooth",
+        });
       }
     }
   }, [currentPosition]);
@@ -39,7 +42,7 @@ const GameNotation = () => {
           event.preventDefault();
         }
       }}
-      className="h-full max-h-full bg-primary rounded-md overflow-x-hidden"
+      className="h-full max-h-full overflow-x-hidden"
       classNames={{
         scrollbar: cn("simplebar-scrollbar", classes.SimpleBarScrollBar),
       }}
@@ -130,8 +133,8 @@ const MovePair = memo(function MovePair({
 
   return (
     <div>
-      <div className="flex items-center h-10">
-        <div className="flex items-center justify-center h-full w-8 bg-neutral-700 border-r text-muted text-center">
+      <div className="flex items-center h-7">
+        <div className="flex items-center justify-center h-full w-12 font-light text-sm text-main-text/70 text-center">
           {depth}
         </div>
         {movePair.map((node, i) => {
@@ -153,7 +156,7 @@ const MovePair = memo(function MovePair({
         })}
       </div>
       {(whiteVariationNodes.length > 0 || blackVariationNodes.length > 0) && (
-        <div className="py-1 bg-neutral-700 border-t border-b">
+        <div className="py-1 bg-main-subline">
           <VariationCell moveNodes={whiteVariationNodes} />
           <VariationCell moveNodes={blackVariationNodes} />
         </div>
@@ -229,9 +232,7 @@ function VariationCell({ moveNodes }: { moveNodes: React.ReactNode[] }) {
   return (
     <div className="pl-2">
       {moveNodes.map((node, i) => (
-        <div key={i} className="">
-          {node}
-        </div>
+        <div key={i}>{node}</div>
       ))}
     </div>
   );

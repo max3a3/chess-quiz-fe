@@ -135,7 +135,7 @@ export const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(
           customInput={(props) => (
             <Input
               {...props}
-              className="w-40 text-gray-100 border-neutral-600 bg-neutral-800 rounded-r-none focus-visible:ring-0 focus-visible:ring-offset-0"
+              className="flex-1 text-white border-none bg-main-button rounded-r-none focus-visible:ring-0 focus-visible:ring-offset-0"
             />
           )}
           placeholder={placeholder}
@@ -144,28 +144,28 @@ export const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(
           {...props}
         />
         {suffix ? (
-          <div className="flex items-center px-1 h-10 rounded-l-none rounded-md border border-l-0 border-neutral-600 bg-neutral-800 ">
-            <span className="leading-none text-sm text-gray-100">{suffix}</span>
+          <div className="flex items-center px-1 h-10 rounded-l-none rounded-md bg-main-button border-l border-white/50">
+            <span className="leading-none text-sm text-white">{suffix}</span>
           </div>
         ) : (
           <div className="flex flex-col">
             <Button
               aria-label="Increase value"
-              className="px-0 h-5 rounded-l-none rounded-br-none border-neutral-600 bg-neutral-800 border-l-0 border-b-[0.5px] focus-visible:relative hover:bg-neutral-600"
+              className="px-2 h-5 rounded-l-none rounded-br-none bg-main-button border-0 border-l border-b-[0.5px] border-white/50 focus-visible:relative hover:bg-main-button/70"
               variant="outline"
               onClick={handleIncrement}
               disabled={value === max}
             >
-              <ChevronUp size={15} className="text-gray-100" />
+              <ChevronUp size={14} className="text-white" />
             </Button>
             <Button
               aria-label="Decrease value"
-              className="px-2 h-5 rounded-l-none rounded-tr-none border-neutral-600 bg-neutral-800 border-l-0 border-t-[0.5px] focus-visible:relative hover:bg-neutral-600"
+              className="px-2 h-5 rounded-l-none rounded-tr-none bg-main-button border-0 border-l border-t-[0.5px] border-white/50 focus-visible:relative hover:bg-main-button/70"
               variant="outline"
               onClick={handleDecrement}
               disabled={value === min}
             >
-              <ChevronDown size={15} className="text-gray-100" />
+              <ChevronDown size={14} className="text-white" />
             </Button>
           </div>
         )}

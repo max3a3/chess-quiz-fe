@@ -43,9 +43,12 @@ function CompleteMoveCell({
   return (
     <div
       ref={isCurrentVariation ? targetRef : undefined}
-      className={cn("inline-block h-full text-muted", !isSubline && "flex-1")}
+      className={cn(
+        "inline-block h-full text-white/70 text-sm",
+        !isSubline && "flex-1"
+      )}
     >
-      <span className="text-sm text-muted/70">
+      <span className="text-xs text-main-text/70">
         {hasNumber && `${moveNumber.toString()}${isWhite ? "." : "..."}`}
       </span>
       {move && (
@@ -57,6 +60,7 @@ function CompleteMoveCell({
           onClick={() => goToMove(movePath)}
           isSubline={isSubline}
           completion={completion}
+          isWhite={isWhite}
         />
       )}
     </div>

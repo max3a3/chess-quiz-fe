@@ -27,12 +27,12 @@ const GoModeInput = ({
           setGoMode(newGo);
         }}
       >
-        <TabsList className="bg-primary">
+        <TabsList className="bg-main-button">
           {types.map((type) => (
             <TabsTrigger
               key={type}
               value={type}
-              className="text-muted-foreground data-[state=active]:bg-zinc-700 data-[state=active]:text-gray-100 hover:text-gray-100"
+              className="p-1.5 text-white/70 data-[state=active]:bg-main-box data-[state=active]:text-white hover:text-white"
             >
               {type}
             </TabsTrigger>

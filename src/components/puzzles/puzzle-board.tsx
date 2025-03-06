@@ -17,6 +17,8 @@ import { chessgroundDests, chessgroundMove } from "chessops/compat";
 import { DrawShape } from "chessground/draw";
 import equal from "fast-deep-equal";
 import { useAtom, useAtomValue } from "jotai/react";
+import { match } from "ts-pattern";
+import { ChevronRightIcon } from "lucide-react";
 
 import ChessBoard from "@/components/chess-board";
 import { ChessStateContext } from "@/provider/chess-state-context";
@@ -35,11 +37,10 @@ import {
   tabEngineSettingsFamily,
 } from "@/state/atoms";
 import PromotionModal from "@/components/common/promotion-modal";
-import { match } from "ts-pattern";
 import { Button } from "@/components/ui/button";
-import { ChevronRightIcon } from "lucide-react";
 import EvalBar from "@/components/analysis/eval-bar";
 import PuzzleAnnotation from "@/components/puzzles/puzzle-annotation";
+import { useElementSize } from "@/hooks/use-elemet-size";
 
 const LARGE_BRUSH = 11;
 const MEDIUM_BRUSH = 7.5;
@@ -273,34 +274,18 @@ const PuzzleBoard = ({
 
   const isEnded = puzzle ? currentMove >= puzzle.moves.length : false;
 
+  const { ref: parentRef, height: parentHeight } = useElementSize();
+
   return (
-    <div className="relative h-fit pl-8">
-      <div className="absolute inset-0 w-6">
-        {settings.enabled && (
-          <>
-            {!evalOpen && (
-              <div className="size-full">
-                <Button size="icon" onClick={() => setEvalOpen(true)}>
-                  <ChevronRightIcon />
-                </Button>
-              </div>
-            )}
-            {evalOpen && (
-              <div onClick={() => setEvalOpen(false)} className="h-full">
-                <EvalBar
-                  score={currentNode.score?.value || null}
-                  orientation={orientation}
-                />
-              </div>
-            )}
-          </>
-        )}
-      </div>
+    <div className="flex gap-2 size-full pr-8" ref={parentRef}>
       <div
         onMouseDown={() => {
           setShapes([]);
         }}
-        className="relative flex-1 h-0 pb-[100%] max-w-[770px]"
+        className="relative size-full"
+        style={{
+          maxWidth: parentHeight,
+        }}
       >
         <PromotionModal
           pendingMove={pendingMove}
@@ -369,7 +354,7 @@ const PuzzleBoard = ({
           hintSelected={selected}
         />
         {currentNode.completion && currentNode.move && square !== undefined && (
-          <div className="absolute inset-0 size-full pointer-events-none">
+          <div className="absolute inset-0 w-full aspect-square pointer-events-none">
             <div className="relative size-full">
               <PuzzleAnnotation
                 orientation="black"
@@ -378,6 +363,31 @@ const PuzzleBoard = ({
               />
             </div>
           </div>
+        )}
+      </div>
+      <div className="w-4">
+        {settings.enabled && (
+          <>
+            {!evalOpen && (
+              <div className="size-full">
+                <Button
+                  size="icon"
+                  onClick={() => setEvalOpen(true)}
+                  className="size-8 bg-main-box hover:bg-main-box/80"
+                >
+                  <ChevronRightIcon />
+                </Button>
+              </div>
+            )}
+            {evalOpen && (
+              <div onClick={() => setEvalOpen(false)} className="h-full">
+                <EvalBar
+                  score={currentNode.score?.value || null}
+                  orientation={orientation}
+                />
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>
