@@ -33,13 +33,11 @@ const EngineSettingsForm = ({ settings, setSettings }: EngineSettingsForm) => {
   );
 
   return (
-    <div className="space-y-4 p-3">
+    <div className="space-y-3 p-3 pt-0">
       <GoModeInput goMode={settings.go} setGoMode={setGoMode} />
       {multipv && (
         <div className="flex items-center gap-2">
-          <span className="flex-1 font-semibold text-muted text-sm">
-            Number of lines
-          </span>
+          <span className="flex-1 text-white text-sm">Number of lines</span>
           <div className="flex items-center gap-2 flex-1">
             <SettingSlider
               value={Number(multipv.value || 1)}
@@ -55,7 +53,7 @@ const EngineSettingsForm = ({ settings, setSettings }: EngineSettingsForm) => {
               }
               max={5}
             />
-            <span className="inline-block w-16 text-right text-muted text-sm">
+            <span className="inline-block w-16 text-right text-white text-sm">
               {multipv.value}/5
             </span>
           </div>
@@ -64,9 +62,7 @@ const EngineSettingsForm = ({ settings, setSettings }: EngineSettingsForm) => {
       {threads && (
         <>
           <div className="flex items-center gap-2">
-            <span className="flex-1 font-semibold text-muted text-sm">
-              Number of cores
-            </span>
+            <span className="flex-1 text-white text-sm">Number of cores</span>
             <div className="flex items-center gap-2 flex-1">
               <SettingSlider
                 value={Number(threads.value || 1)}
@@ -82,16 +78,14 @@ const EngineSettingsForm = ({ settings, setSettings }: EngineSettingsForm) => {
                 }
                 max={32}
               />
-              <span className="inline-block w-16 text-right text-muted text-sm">
+              <span className="inline-block w-16 text-right text-white text-sm">
                 {threads.value}/32
               </span>
             </div>
           </div>
           {hash && (
             <div className="flex items-center gap-2">
-              <span className="flex-1 font-semibold text-muted text-sm">
-                Size of hash
-              </span>
+              <span className="flex-1 text-white text-sm">Size of hash</span>
               <div className="flex items-center gap-2 flex-1">
                 <HashSlider
                   value={Number(hash.value || 1)}
@@ -106,7 +100,7 @@ const EngineSettingsForm = ({ settings, setSettings }: EngineSettingsForm) => {
                     })
                   }
                 />
-                <span className="inline-block w-16 text-right text-muted text-sm">
+                <span className="inline-block w-16 text-right text-white text-sm">
                   {hash.value}/512
                 </span>
               </div>

@@ -41,6 +41,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { BestMoves } from "@/utils/types";
 import { formatNodes } from "@/utils/format";
 import { formatScore } from "@/utils/score";
+import { AccordionContent, AccordionTrigger } from "@/components/ui/accordion";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface BestMovesProps {
   engine: Engine;
@@ -156,139 +158,166 @@ function BestMovesComponent({
   const error = posError || searchingPosError;
 
   return (
-    <div className="pb-2 bg-zinc-800 rounded-md">
-      <div className="flex items-center justify-between p-3">
-        <div className="flex items-center">
-          <EngineTrigger key={engine.name} engine={engine} />
-          <Select
-            value={engine.name}
-            onValueChange={(value) =>
-              setSelectedEngine(
-                loadedEngines.find((engine) => engine.name === value)!
-              )
-            }
-          >
-            <SelectTrigger className="py-0 w-fit bg-transparent border-none text-lg text-muted font-semibold select-none [&>svg]:hidden transition-colors hover:bg-zinc-700">
-              <SelectValue placeholder="Engine" />
-            </SelectTrigger>
-            <SelectContent className="bg-zinc-800 border-zinc-700">
-              {loadedEngines.map((engine) => (
-                <SelectItem
-                  key={engine.name}
-                  value={engine.name}
-                  className="text-muted focus:bg-zinc-700 focus:text-muted"
+    <>
+      <AccordionTrigger asChild showArrow={false}>
+        <div
+          role="button"
+          tabIndex={0}
+          className="flex items-center justify-between !p-3 bg-main-box cursor-pointer hover:no-underline"
+        >
+          <div className="flex items-center">
+            <EngineTrigger key={engine.name} engine={engine} />
+            <Select
+              value={engine.name}
+              onValueChange={(value) =>
+                setSelectedEngine(
+                  loadedEngines.find((engine) => engine.name === value)!
+                )
+              }
+            >
+              <SelectTrigger className="py-0 w-fit h-9 bg-transparent border-none text-lg text-white font-semibold select-none [&>svg]:hidden transition-colors hover:bg-main-button">
+                <SelectValue placeholder="Engine" />
+              </SelectTrigger>
+              <SelectContent className="bg-main-box border-main-border">
+                {loadedEngines.map((engine) => (
+                  <SelectItem
+                    key={engine.name}
+                    value={engine.name}
+                    className="text-white focus:bg-main-button focus:text-white"
+                  >
+                    {engine.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex items-center">
+            <ActionTooltip label="Check the opponent's threat">
+              <div>
+                <Button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setThreat(!threat);
+                  }}
+                  disabled={!settings.enabled}
+                  size="icon"
+                  className="size-9 bg-inherit hover:bg-inherit hover:opacity-70 transition-opacity"
                 >
-                  {engine.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+                  <TargetIcon
+                    className={cn("size-4", threat && "text-red-600")}
+                  />
+                </Button>
+              </div>
+            </ActionTooltip>
+            <Button
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleSettingsOn();
+              }}
+              size="icon"
+              className="size-9 bg-inherit hover:bg-inherit hover:opacity-70 transition-opacity"
+            >
+              <SettingsIcon className="size-4" />
+            </Button>
+          </div>
         </div>
-        <EngineTop
-          engineVariations={engineVariations}
-          isGameOver={isGameOver}
-          enabled={settings.enabled}
-          progress={progress}
-          error={error}
-        />
-        <div className="flex items-center">
-          <ActionTooltip label="Check the opponent's threat">
-            <div>
-              <Button
-                onClick={() => setThreat(!threat)}
-                disabled={!settings.enabled}
-                size="icon"
-                className="bg-inherit hover:bg-inherit hover:opacity-70 transition-opacity"
-              >
-                <TargetIcon
-                  className={cn("size-4", threat && "text-red-600")}
-                />
-              </Button>
-            </div>
-          </ActionTooltip>
-          <Button
-            onClick={toggleSettingsOn}
-            size="icon"
-            className="bg-inherit hover:bg-inherit hover:opacity-70 transition-opacity"
-          >
-            <SettingsIcon className="size-4" />
-          </Button>
-        </div>
-      </div>
-      <Collapsible open={settingsOn} onOpenChange={setSettingsOn}>
-        <CollapsibleContent>
-          <EngineSettingsForm settings={settings} setSettings={setSettings} />
-        </CollapsibleContent>
-      </Collapsible>
-      <Progress value={progress} className="h-1 rounded-md" />
-      <Table>
-        <TableBody>
-          {error && (
-            <TableRow className="hover:bg-transparent">
-              <TableCell className="py-8">
-                <p className="text-muted text-center">
-                  Invalid position: {chessopsError(error)}
-                </p>
-              </TableCell>
-            </TableRow>
-          )}
-          {isGameOver && (
-            <TableRow className="hover:bg-transparent">
-              <TableCell className="py-8">
-                <p className="text-muted text-center">Game is over</p>
-              </TableCell>
-            </TableRow>
-          )}
-          {engineVariations && engineVariations.length === 0 && !isGameOver && (
-            <TableRow className="hover:bg-transparent">
-              <TableCell className="py-8">
-                <p className="text-muted text-center">No analysis available</p>
-              </TableCell>
-            </TableRow>
-          )}
-          {!isGameOver &&
-            !error &&
-            !engineVariations &&
-            (settings.enabled ? (
-              [
-                ...Array(
-                  settings.settings.find((s) => s.name === "MultiPV")?.value ??
-                    1
-                ),
-              ].map((_, i) => (
-                <TableRow key={i} className="hover:bg-transparent">
-                  <TableCell>
-                    <Skeleton className="h-7 rounded-full" />
+      </AccordionTrigger>
+      <ScrollArea
+        className="flex flex-col max-h-[300px] overflow-y-auto"
+        onScroll={() =>
+          document.dispatchEvent(new Event("analysis-panel-scroll"))
+        }
+      >
+        <Collapsible open={settingsOn} onOpenChange={setSettingsOn}>
+          <CollapsibleContent>
+            <EngineSettingsForm settings={settings} setSettings={setSettings} />
+          </CollapsibleContent>
+        </Collapsible>
+        <Progress value={progress} className="h-1 rounded-md" />
+        <AccordionContent>
+          <EngineTop
+            engineVariations={engineVariations}
+            isGameOver={isGameOver}
+            enabled={settings.enabled}
+            progress={progress}
+            error={error}
+          />
+          <Table>
+            <TableBody>
+              {error && (
+                <TableRow className="hover:bg-transparent">
+                  <TableCell className="py-8">
+                    <p className="text-white text-center">
+                      Invalid position: {chessopsError(error)}
+                    </p>
                   </TableCell>
                 </TableRow>
-              ))
-            ) : (
-              <TableRow className="hover:bg-transparent">
-                <TableCell className="py-8">
-                  <p className="text-muted text-center">Engine isn't enabled</p>
-                </TableCell>
-              </TableRow>
-            ))}
-          {!error &&
-            finalFen &&
-            engineVariations &&
-            engineVariations.map((engineVariation, index) => {
-              return (
-                <AnalysisRow
-                  key={index}
-                  engine={engine.name}
-                  moves={engineVariation.sanMoves}
-                  score={engineVariation.score}
-                  halfMoves={halfMoves}
-                  threat={threat}
-                  fen={threat ? swapMove(finalFen) : finalFen}
-                  orientation={orientation}
-                />
-              );
-            })}
-        </TableBody>
-      </Table>
-    </div>
+              )}
+              {isGameOver && (
+                <TableRow className="hover:bg-transparent">
+                  <TableCell className="py-8">
+                    <p className="text-white text-center">Game is over</p>
+                  </TableCell>
+                </TableRow>
+              )}
+              {engineVariations &&
+                engineVariations.length === 0 &&
+                !isGameOver && (
+                  <TableRow className="hover:bg-transparent">
+                    <TableCell className="py-8">
+                      <p className="text-white text-center">
+                        No analysis available
+                      </p>
+                    </TableCell>
+                  </TableRow>
+                )}
+              {!isGameOver &&
+                !error &&
+                !engineVariations &&
+                (settings.enabled ? (
+                  [
+                    ...Array(
+                      settings.settings.find((s) => s.name === "MultiPV")
+                        ?.value ?? 1
+                    ),
+                  ].map((_, i) => (
+                    <TableRow key={i} className="hover:bg-transparent">
+                      <TableCell>
+                        <Skeleton className="h-7 rounded-full" />
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow className="hover:bg-transparent">
+                    <TableCell className="py-8">
+                      <p className="text-white text-center">
+                        Engine isn't enabled
+                      </p>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              {!error &&
+                finalFen &&
+                engineVariations &&
+                engineVariations.map((engineVariation, index) => {
+                  return (
+                    <AnalysisRow
+                      key={index}
+                      engine={engine.name}
+                      moves={engineVariation.sanMoves}
+                      score={engineVariation.score}
+                      halfMoves={halfMoves}
+                      threat={threat}
+                      fen={threat ? swapMove(finalFen) : finalFen}
+                      orientation={orientation}
+                    />
+                  );
+                })}
+            </TableBody>
+          </Table>
+        </AccordionContent>
+      </ScrollArea>
+    </>
   );
 }
 
@@ -310,10 +339,10 @@ function EngineTop({
   const nps = isComputed ? formatNodes(engineVariations[0].nps) : 0;
 
   return (
-    <div className="flex justify-between flex-1 pr-3">
+    <div className="flex justify-between flex-1 pt-3 px-3">
       <div className="flex items-center">
         {enabled && !isGameOver && !error && !engineVariations && (
-          <div className="p-1 bg-primary rounded-md text-muted text-sm">
+          <div className="p-1 bg-main-button rounded-md text-muted text-xs">
             Loading...
           </div>
         )}
@@ -323,7 +352,7 @@ function EngineTop({
           engineVariations &&
           engineVariations.length > 0 && (
             <ActionTooltip label="How fast the engine is running">
-              <div className="p-1 bg-primary rounded-md text-muted text-xs">
+              <div className="p-1 bg-main-button rounded-md text-muted text-xs">
                 {nps} nodes/s
               </div>
             </ActionTooltip>
@@ -332,19 +361,16 @@ function EngineTop({
       <div className="flex items-center gap-2">
         {!isGameOver && engineVariations && engineVariations.length > 0 && (
           <>
-            <div className="flex flex-col items-center">
-              <span className="font-semibold text-muted text-xs uppercase">
-                Eval
-              </span>
-              <span className="font-bold text-muted text-sm">
+            <div className="p-1 bg-main-button rounded-md">
+              <span className="text-muted text-xs uppercase">Eval:</span>
+              <span className="text-muted text-xs">
+                {" "}
                 {formatScore(engineVariations[0].score.value, 1) ?? 0}
               </span>
             </div>
-            <div className="flex flex-col items-center">
-              <span className="font-semibold text-muted text-xs uppercase">
-                Depth
-              </span>
-              <span className="font-bold text-muted text-sm">{depth}</span>
+            <div className="p-1 bg-main-button rounded-md">
+              <span className="text-muted text-xs uppercase">Depth:</span>
+              <span className="text-muted text-xs"> {depth}</span>
             </div>
           </>
         )}

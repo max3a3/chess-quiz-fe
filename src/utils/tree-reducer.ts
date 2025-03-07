@@ -3,9 +3,8 @@ import { Move } from "chessops";
 import { INITIAL_FEN } from "chessops/fen";
 
 import { positionFromFen } from "@/utils/chessops";
-import { Outcome } from "@/utils/types";
+import { Outcome, Score } from "@/utils/types";
 import { Annotation } from "@/utils/annotation";
-import { Score } from "@/utils/score";
 import { NodeCompletion } from "@/utils/puzzles";
 
 export interface TreeState {

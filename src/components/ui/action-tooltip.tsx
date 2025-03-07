@@ -34,7 +34,7 @@ const ActionTooltip = ({
           align={align}
           className={cn(
             "border-none",
-            color === "dark" && "bg-primary text-muted"
+            color === "dark" && "bg-main-box text-muted"
           )}
         >
           <p className="text-sm font-medium capitalize">

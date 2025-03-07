@@ -44,8 +44,8 @@ const BoardTabTrigger = ({
     <div
       key={tab.value}
       className={cn(
-        "flex justify-between items-center gap-4 pl-3 pr-1 min-w-36 h-10 border rounded-md cursor-pointer transition-colors hover:bg-slate-100",
-        selected && "bg-slate-100"
+        "flex justify-between items-center gap-4 pl-3 pr-1 min-w-36 h-10 bg-main-button border border-main-border rounded-md cursor-pointer transition-colors hover:bg-opacity-80",
+        selected && "bg-main-box"
       )}
       onPointerDown={(e) => {
         if (e.button === 0) {
@@ -72,15 +72,15 @@ const BoardTabTrigger = ({
             e.currentTarget.blur();
           }
         }}
-        className="font-medium text-sm focus:outline-none"
+        className="font-medium text-sm text-white focus:outline-none"
       >
         {tab.name}
       </span>
       <button
         onClick={() => closeTab(tab.value)}
-        className="p-2 rounded-md transition-colors hover:bg-slate-200"
+        className="p-2 rounded-md transition-colors hover:bg-main-button"
       >
-        <XIcon className="size-3.5" />
+        <XIcon className="size-3.5 text-white" />
       </button>
     </div>
   );

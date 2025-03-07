@@ -23,7 +23,7 @@ function EvalBar({
     ScoreBars = [
       <div
         key="black"
-        className="flex flex-col bg-gray-800"
+        className="flex flex-col bg-[#A08871]/50"
         style={{
           height: `${100 - progress}%`,
           transition: "height 0.2s ease",
@@ -31,7 +31,7 @@ function EvalBar({
       >
         <span
           className={cn(
-            "py-[3px] text-xs text-center text-gray-200",
+            "py-1.5 text-xs text-center text-[#F8ECD2]/50",
             orientation === "black" && "mt-auto"
           )}
         >
@@ -40,7 +40,7 @@ function EvalBar({
       </div>,
       <div
         key="white"
-        className="flex flex-col bg-gray-200"
+        className="flex flex-col bg-[#F8ECD2]/50"
         style={{
           height: `${progress}%`,
           transition: "height 0.2s ease",
@@ -48,7 +48,7 @@ function EvalBar({
       >
         <span
           className={cn(
-            "py-[3px] text-xs text-center text-gray-800",
+            "py-[3px] text-xs text-center text-[#A08871]/50",
             orientation === "white" && "mt-auto"
           )}
         >
@@ -68,7 +68,9 @@ function EvalBar({
       disabled={!score}
       color={score && score.value < 0 ? "dark" : undefined}
     >
-      <div className="w-6 h-full rounded-sm overflow-hidden">{ScoreBars}</div>
+      <div className="w-[18px] h-full rounded-[10px] overflow-hidden">
+        {ScoreBars}
+      </div>
     </ActionTooltip>
   );
 }

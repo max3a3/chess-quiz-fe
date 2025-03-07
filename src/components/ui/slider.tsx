@@ -81,8 +81,8 @@ const Slider = React.forwardRef<
         onPointerDown={handlePointerDown}
         {...props}
       >
-        <SliderPrimitive.Track className="relative h-2 w-full grow overflow-hidden rounded-full bg-primary">
-          <SliderPrimitive.Range className="absolute h-full bg-blue-500" />
+        <SliderPrimitive.Track className="relative h-2 w-full grow overflow-hidden rounded-full bg-progress">
+          <SliderPrimitive.Range className="absolute h-full bg-progress-foreground" />
           {showMarks &&
             marks.map(
               (_, i) =>
@@ -106,7 +106,7 @@ const Slider = React.forwardRef<
           <Tooltip open={showTooltip && showTooltipState}>
             <TooltipTrigger asChild>
               <SliderPrimitive.Thumb
-                className="block size-4 rounded-full border-2 border-primary bg-background ring-offset-background cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 disabled:pointer-events-none disabled:opacity-50"
+                className="block size-4 rounded-full border border-main-border bg-background ring-offset-background cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 disabled:pointer-events-none disabled:opacity-50"
                 onMouseEnter={() => setShowTooltipState(true)}
                 onMouseLeave={() => setShowTooltipState(false)}
               />

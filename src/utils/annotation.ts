@@ -7,6 +7,13 @@ export function addPieceSymbol(move: string): string {
   return pieceChar + move.slice(1);
 }
 
+export function getPieceSymbol(move: string): string {
+  const pieceChar = pieceChars[move[0] as keyof typeof pieceChars];
+
+  if (typeof pieceChar === "undefined") return "";
+  return pieceChar;
+}
+
 export type Annotation =
   | ""
   | "!"

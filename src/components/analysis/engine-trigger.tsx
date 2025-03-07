@@ -63,7 +63,8 @@ const EngineTrigger = ({ engine }: { engine: Engine }) => {
     <div>
       <Button
         size="icon"
-        onClick={() => {
+        onClick={(e) => {
+          e.stopPropagation();
           setSettings((prev) => ({ ...prev, enabled: !prev.enabled }));
         }}
         className={cn(

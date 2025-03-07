@@ -1,12 +1,7 @@
 import { memo, useContext } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { useStore } from "zustand";
-import {
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  ChevronsLeftIcon,
-  ChevronsRightIcon,
-} from "lucide-react";
+import { FastForwardIcon, PlayIcon, RewindIcon } from "lucide-react";
 
 import { ChessStateContext } from "@/provider/chess-state-context";
 
@@ -40,27 +35,27 @@ function MoveControls({ readOnly }: { readOnly?: boolean }) {
     <div className="flex gap-2">
       <button
         onClick={start}
-        className="flex justify-center items-center flex-1 py-1 bg-primary rounded-md hover:bg-primary/90 focus:outline-none"
+        className="flex justify-center items-center flex-1 py-1 focus:outline-none"
       >
-        <ChevronsLeftIcon className="text-muted" />
+        <RewindIcon className="text-white" />
       </button>
       <button
         onClick={previous}
-        className="flex justify-center items-center flex-1 py-1 bg-primary rounded-md hover:bg-primary/90 focus:outline-none"
+        className="flex justify-center items-center flex-1 py-1 focus:outline-none"
       >
-        <ChevronLeftIcon className="text-muted" />
+        <PlayIcon className="text-white rotate-180" />
       </button>
       <button
         onClick={next}
-        className="flex justify-center items-center flex-1 py-1 bg-primary rounded-md hover:bg-primary/90 focus:outline-none"
+        className="flex justify-center items-center flex-1 py-1 focus:outline-none"
       >
-        <ChevronRightIcon className="text-muted" />
+        <PlayIcon className="text-white" />
       </button>
       <button
         onClick={end}
-        className="flex justify-center items-center flex-1 py-1 bg-primary rounded-md hover:bg-primary/90 focus:outline-none"
+        className="flex justify-center items-center flex-1 py-1 focus:outline-none"
       >
-        <ChevronsRightIcon className="text-muted" />
+        <FastForwardIcon className="text-white" />
       </button>
     </div>
   );

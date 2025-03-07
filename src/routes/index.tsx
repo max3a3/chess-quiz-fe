@@ -75,7 +75,7 @@ function HomePage() {
     <Tabs
       value={activeTab || undefined}
       onValueChange={(value) => setActiveTab(value)}
-      className="flex flex-col pt-4 px-4 h-full"
+      className="flex flex-col p-4 h-full"
     >
       <div className="flex gap-2">
         {tabs.map((tab) => (
@@ -99,16 +99,16 @@ function HomePage() {
               setActiveTab,
             })
           }
-          className="flex items-center justify-center size-10 border rounded-md transition-colors hover:bg-slate-100"
+          className="flex items-center justify-center size-10 bg-main-button border border-main-border rounded-md transition-colors hover:bg-opacity-80"
         >
-          <PlusIcon className="size-5" />
+          <PlusIcon className="size-5 text-white" />
         </button>
       </div>
       {tabs.map((tab) => (
         <TabsContent
           key={tab.value}
           value={tab.value}
-          className="mt-0 pt-3 h-full focus:outline-none overflow-hidden"
+          className="mt-0 pt-5 h-full focus:outline-none overflow-hidden"
         >
           <TabSwitch tab={tab} />
         </TabsContent>

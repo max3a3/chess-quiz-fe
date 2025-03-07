@@ -18,11 +18,11 @@ function NavbarLink({ url, icon: Icon, label }: NavbarLinkProps) {
       <Link
         to={url}
         className={cn(
-          "flex items-center justify-center size-12 border-white border-l-[3px] border-r-[3px]",
+          "flex items-center justify-center size-12 border-main-container border-l-[3px] border-r-[3px]",
           matcesRoute({ to: url, fuzzy: true }) && "border-l-blue-500"
         )}
       >
-        <Icon size="1.5rem" stroke={1.5} />
+        <Icon size="1.5rem" stroke={1.5} color="white" />
       </Link>
     </ActionTooltip>
   );
@@ -36,7 +36,7 @@ const SideBar = () => {
   ));
 
   return (
-    <div className="flex flex-col justify-between border-r">
+    <div className="flex flex-col justify-between border-r border-main-border">
       <div>{links}</div>
       <div>
         <NavbarLink icon={IconSettings} label="settings" url="/settings" />

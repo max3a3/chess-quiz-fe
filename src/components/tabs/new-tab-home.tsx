@@ -19,7 +19,7 @@ const NewTabHome = ({ id }: { id: string }) => {
 
   const cards = [
     {
-      icon: <IconChess size={60} stroke={1.5} />,
+      icon: <IconChess size={60} stroke={1.5} color="white" />,
       title: "Play Chess",
       description: "Play against an engine or a friend",
       label: "Play",
@@ -35,7 +35,7 @@ const NewTabHome = ({ id }: { id: string }) => {
       },
     },
     {
-      icon: <IconPuzzle size={60} stroke={1.5} />,
+      icon: <IconPuzzle size={60} stroke={1.5} color="white" />,
       title: "Puzzles",
       description: "Train your chess skills",
       label: "Train",
@@ -55,14 +55,22 @@ const NewTabHome = ({ id }: { id: string }) => {
   return (
     <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-2">
       {cards.map((card, index) => (
-        <Card key={index} className="flex flex-col items-center gap-2">
+        <Card
+          key={index}
+          className="flex flex-col items-center gap-2 bg-main-box border-none"
+        >
           <CardHeader className="w-full">
-            <CardTitle>{card.title}</CardTitle>
-            <CardDescription>{card.description}</CardDescription>
+            <CardTitle className="text-white">{card.title}</CardTitle>
+            <CardDescription className="text-main-text">
+              {card.description}
+            </CardDescription>
           </CardHeader>
           <CardContent>{card.icon}</CardContent>
           <CardFooter className="w-full">
-            <Button className="w-full" onClick={card.onClick}>
+            <Button
+              className="w-full bg-main-button text-white transition-colors hover:bg-opacity-70"
+              onClick={card.onClick}
+            >
               {card.label}
             </Button>
           </CardFooter>
