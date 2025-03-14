@@ -26,7 +26,7 @@ import { Score } from "@/utils/types";
 interface ChessStoreState {
   root: TreeNode;
   headers: GameHeaders;
-  position: number[];
+  position: number[]; // array of move as the index of children
   dirty: boolean;
   showHint: boolean;
 
@@ -94,29 +94,29 @@ export const createChessStore = (id?: string, initialTree?: TreeState) => {
     currentNode: () => getNodeAtPath(get().root, get().position),
 
     setState: (state) => {
-      set(() => state);
+      set(() => state,undefined,"setState");
     },
 
     reset: () =>
       set(() => {
         return defaultTree();
-      }),
+      },undefined,"reset"),
 
     save: () => {
       set((state) => ({
         ...state,
         dirty: false,
-      }));
+      }),undefined,"save");
     },
 
     setFen: (fen) =>
       set(
         produce((state) => {
+            debugger
           state.dirty = true;
           state.root = defaultTree(fen).root;
           state.position = [];
-        })
-      ),
+        }),undefined,"setFen"),
 
     goToNext: () =>
       set((state) => {
@@ -138,9 +138,9 @@ export const createChessStore = (id?: string, initialTree?: TreeState) => {
     goToPrevious: () =>
       set((state) => ({
         ...state,
-        position: state.position.slice(0, -1),
+        position: state.position.slice(0, -1), // delete the last one
         showHint: false,
-      })),
+      }),undefined,"goToPrevious"),
 
     makeMove: ({
       payload,
@@ -174,8 +174,7 @@ export const createChessStore = (id?: string, initialTree?: TreeState) => {
             completion,
             sound,
           });
-        })
-      );
+        }),undefined,"makeMove");
     },
 
     // mainline에 추가
@@ -183,7 +182,8 @@ export const createChessStore = (id?: string, initialTree?: TreeState) => {
       set(
         produce((state) => {
           makeMove({ state, move: payload, last: true, clock });
-        })
+        }),undefined,"appendMove"
+
       ),
 
     makeMoves: ({
@@ -213,7 +213,7 @@ export const createChessStore = (id?: string, initialTree?: TreeState) => {
               completion: puzzleMoves && i === 0 ? "correct" : undefined,
             });
           }
-        })
+        }),undefined,"makeMoves"
       ),
 
     // mainline 끝으로 이동
@@ -228,20 +228,23 @@ export const createChessStore = (id?: string, initialTree?: TreeState) => {
             currentNode = currentNode.children[0];
           }
           state.position = endPosition;
-        })
+        }),undefined,"goToEnd"
       ),
     goToStart: () =>
       set((state) => ({
         ...state,
         position: state.headers.start || [],
         showHint: false,
-      })),
+      }
+      ),undefined,"gotoStart"),
+
     goToMove: (move) =>
       set((state) => ({
         ...state,
         position: move,
         showHint: false,
-      })),
+      })
+          ,undefined,"goToMove"),
     //변화도 시작점으로 이동
     goToBranchStart: () => {
       set(
@@ -261,7 +264,7 @@ export const createChessStore = (id?: string, initialTree?: TreeState) => {
             state.position = state.position.slice(0, -1);
           }
         })
-      );
+          ,undefined,"goToBranchStart");
     },
     goToBranchEnd: () => {
       set(
@@ -273,7 +276,7 @@ export const createChessStore = (id?: string, initialTree?: TreeState) => {
             currentNode = currentNode.children[0];
           }
         })
-      );
+      ,undefined,"goToBranchEnd");
     },
     nextBranch: () =>
       set(
@@ -294,7 +297,7 @@ export const createChessStore = (id?: string, initialTree?: TreeState) => {
             ...state.position.slice(0, -1),
             (branchIndex + 1) % parent.children.length,
           ];
-        })
+        },undefined,"nextBranch")
       ),
     previousBranch: () =>
       set(
@@ -315,7 +318,7 @@ export const createChessStore = (id?: string, initialTree?: TreeState) => {
             ...state.position.slice(0, -1),
             (branchIndex + parent.children.length - 1) % parent.children.length,
           ];
-        })
+        },undefined,"previousBranch")
       ),
     nextBranching: () =>
       set(
@@ -363,7 +366,7 @@ export const createChessStore = (id?: string, initialTree?: TreeState) => {
         produce((state) => {
           state.dirty = true;
           promoteVariation(state, path);
-        })
+        }),undefined,"promoteVariation"
       ),
     promoteToMainline: (path) =>
       set(
@@ -429,6 +432,7 @@ export const createChessStore = (id?: string, initialTree?: TreeState) => {
     setHeaders: (headers) =>
       set(
         produce((state) => {
+            debugger
           state.dirty = true;
           state.headers = headers;
           if (headers.fen && headers.fen !== state.root.fen) {
@@ -444,7 +448,7 @@ export const createChessStore = (id?: string, initialTree?: TreeState) => {
           state.dirty = true;
           setShapes(state, shapes);
         })
-      ),
+          ,undefined,"setShapes"),
     clearShapes: () =>
       set(
         produce((state) => {
