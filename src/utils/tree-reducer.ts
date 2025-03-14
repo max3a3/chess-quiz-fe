@@ -84,8 +84,8 @@ export function* treeIteratorMainLine(node: TreeNode): Generator<ListNode> {
   while (current?.node) {
     yield current;
     current = {
-      position: [...current.position, 0],
-      node: current.node.children[0],
+      position: [...current.position, 0], // append to position array
+      node: current.node.children[0], // the node data
     };
   }
 }
@@ -154,6 +154,7 @@ export function createNode({
   };
 }
 
+// recurse on node children on the position array
 export const getNodeAtPath = (node: TreeNode, path: number[]): TreeNode => {
   let currentNode = node;
   for (const index of path) {

@@ -44,11 +44,12 @@ const Puzzles = ({ id }: { id: string }) => {
 
   async function setPuzzle(puzzle: { fen: string; moves: string[] }) {
     setFen(puzzle.fen);
-    makeMove({
-      payload: parseUci(puzzle.moves[0])!,
-      changePosition: false,
-      sound: false,
-    });
+    // this was replaced below somehow he didnt' delete this
+    // makeMove({
+    //   payload: parseUci(puzzle.moves[0])!,
+    //   changePosition: false,
+    //   sound: false,
+    // });
     await new Promise((r) => setTimeout(r, 100));
     makeMove({ payload: parseUci(puzzle.moves[0])! });
   }

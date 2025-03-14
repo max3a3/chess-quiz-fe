@@ -606,8 +606,11 @@ function makeMove({
   const position = last
     ? mainLine[mainLine.length - 1].position
     : state.position;
+
   const moveNode = getNodeAtPath(state.root, position);
+
   if (!moveNode) return;
+
   // FEN을 기반으로 체스 포지션 객체 생성
   const [pos] = positionFromFen(moveNode.fen);
   if (!pos) return;
@@ -630,6 +633,7 @@ function makeMove({
     }
   }
 
+
   const newFen = makeFen(pos.toSetup());
 
   if (
@@ -639,8 +643,11 @@ function makeMove({
     state.headers.result = "1/2-1/2";
   }
 
+
   //변화도에서 동일한 수가 있는지 확인
+
   const i = moveNode.children.findIndex((n) => n.san === san);
+  // found the same move already
   if (i !== -1) {
     //있다면 해당 위치로 state.position을 이동.
     if (changePosition) {
