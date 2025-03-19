@@ -77,6 +77,7 @@ const BoardGame = () => {
   return (
     <section>
       <div className="flex gap-4 p-2">
+        <div className="w-96">
         <ChessBoard
           fen={currentNode.fen}
           setBoardFen={setBoardFen}
@@ -130,6 +131,7 @@ const BoardGame = () => {
             },
           }}
         />
+        </div>
         <div className="flex flex-1">
           <div className="flex flex-col space-y-2 flex-1">
             <div className="flex-1">
