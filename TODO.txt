@@ -1,0 +1,4 @@
+add a button to read pgn and on the chess board
+
+read using like we did in react-chess-basic
+

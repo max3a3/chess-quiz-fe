@@ -9,6 +9,7 @@ import ChessBoard from "@/components/chess-board";
 import { ChessStateContext } from "@/provider/chess-state-context";
 import GameNotation from "@/components/common/game-notation";
 import MoveControls from "@/components/common/move-controls";
+import { parsePgn } from "chessops/pgn";
 
 const BoardGame = () => {
   const store = useContext(ChessStateContext)!;
@@ -74,6 +75,13 @@ const BoardGame = () => {
       ? [chessgroundMove(currentNode.move)[0], makeSquare(square)!]
       : undefined;
 
+  const readPgn = async () => {
+    const response = await fetch('/data/danya.pgn');
+    const pgnText = await response.text();
+    let pgnData = parsePgn(pgnText);
+    debugger
+    console.log(pgnText);
+  }
   return (
     <section>
       <div className="flex gap-4 p-2">
@@ -131,6 +139,7 @@ const BoardGame = () => {
             },
           }}
         />
+            <button onClick={readPgn} className="text-white">readPgn</button>
         </div>
         <div className="flex flex-1">
           <div className="flex flex-col space-y-2 flex-1">

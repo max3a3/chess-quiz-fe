@@ -1979,6 +1979,11 @@ chalk@^4.0.0:
     ansi-styles "^4.1.0"
     supports-color "^7.1.0"
 
+chess.js@1.0.0-beta.8:
+  version "1.0.0-beta.8"
+  resolved "https://registry.yarnpkg.com/chess.js/-/chess.js-1.0.0-beta.8.tgz#be5e73eabd49e272f41d26bc7fddc93cbcda912f"
+  integrity sha512-UngzUMXmexcQaQA/UEJuJj5vatEy34awYMD5YMOp/FW3HM7lqspp7ymYs5JAmquDq0WROtURRfSffoa/vrCCyw==
+
 chess.js@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/chess.js/-/chess.js-1.0.0.tgz#2bf53c75722bab9b730533e82a6e08a79d88f52d"
@@ -3072,6 +3077,13 @@ prelude-ls@^1.2.1:
   version "1.2.1"
   resolved "https://registry.yarnpkg.com/prelude-ls/-/prelude-ls-1.2.1.tgz#debc6489d7a6e6b0e7611888cec880337d316396"
   integrity sha512-vkcDPrRZo1QZLbn5RLGPpg/WmIQ65qoWWhcGKf/b5eplkkarX0m9z8ppCat4mlOqUsWpyNuYgO3VRyrYHSzX5g==
+
+prettier-plugin-pgn@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/prettier-plugin-pgn/-/prettier-plugin-pgn-1.0.0.tgz#81316c9dc21531b0cc6dbd25b33aae4974ec1195"
+  integrity sha512-ycKTWnF/AUOBy7URJBDhFeesQZSnE25tCHcOrVAhiSIySwvkRoWFQKclCzjOGBrq9aKETo82FYNy2twZrD7zyQ==
+  dependencies:
+    chess.js "1.0.0-beta.8"
 
 prettier@^3.5.0:
   version "3.5.0"
