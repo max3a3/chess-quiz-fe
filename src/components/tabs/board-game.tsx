@@ -26,6 +26,7 @@ const BoardGame = () => {
   const setHeaders = useStore(store, (s) => s.setHeaders);
   const deleteMove = useStore(store, (s) => s.deleteMove);
   const clearShapes = useStore(store, (s) => s.clearShapes);
+  const loadPgn = useStore(store, (s) => s.loadPgn);
   const setShapes = useStore(store, (s) => s.setShapes);
   const setFen = useStore(store, (s) => s.setFen);
 
@@ -78,9 +79,7 @@ const BoardGame = () => {
   const readPgn = async () => {
     const response = await fetch('/data/danya.pgn');
     const pgnText = await response.text();
-    let pgnData = parsePgn(pgnText);
-    debugger
-    console.log(pgnText);
+    loadPgn(pgnText)
   }
   return (
     <section>
@@ -139,7 +138,7 @@ const BoardGame = () => {
             },
           }}
         />
-            <button onClick={readPgn} className="text-white">readPgn</button>
+            <button onClick={readPgn} className="text-white">[readPgn]</button>
         </div>
         <div className="flex flex-1">
           <div className="flex flex-col space-y-2 flex-1">
