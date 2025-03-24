@@ -68,6 +68,7 @@ interface ChessStoreState {
     promoteVariation: (path: number[]) => void;
     promoteToMainline: (path: number[]) => void;
     copyVariationPgn: (path: number[]) => void;
+    getPgn: () => string;
 
     setStart: (start: number[]) => void;
 
@@ -428,7 +429,17 @@ export const createChessStore = (id?: string, initialTree?: TreeState) => {
             });
             navigator.clipboard.writeText(pgn);
         },
-
+        getPgn: () => {
+            const {root} = get();
+            const pgn = getPGN(root, {
+                headers: null,
+                comments: false,
+                extraMarkups: false,
+                glyphs: true,
+                variations: true,
+            });
+                        return pgn
+        },
         setStart: (start) =>
             set(
                 produce((state) => {

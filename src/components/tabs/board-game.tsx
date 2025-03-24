@@ -1,4 +1,4 @@
-import { useCallback, useContext, useState } from "react";
+import { use, useCallback, useContext, useState } from "react";
 import { useStore } from "zustand";
 import { makeSquare, NormalMove, parseSquare, SquareName } from "chessops";
 import { chessgroundDests, chessgroundMove } from "chessops/compat";
@@ -29,6 +29,7 @@ const BoardGame = () => {
   const loadPgn = useStore(store, (s) => s.loadPgn);
   const setShapes = useStore(store, (s) => s.setShapes);
   const setFen = useStore(store, (s) => s.setFen);
+  const getPgn = useStore(store, (s) => s.getPgn);
 
   const [pos, error] = positionFromFen(currentNode.fen);
   let dests: Map<SquareName, SquareName[]> = pos
@@ -81,6 +82,9 @@ const BoardGame = () => {
     const pgnText = await response.text();
     loadPgn(pgnText)
   }
+  const [textContent, setTextContent] = useState("");
+
+
   return (
     <section>
       <div className="flex gap-4 p-2">
@@ -139,6 +143,21 @@ const BoardGame = () => {
           }}
         />
             <button onClick={readPgn} className="text-white">[readPgn]</button>
+  <button
+    onClick={() => {
+      const pgn = getPgn()
+      setTextContent(pgn)
+    }}
+    className="text-white"
+  >
+    [getPgn]
+  </button>
+        <textarea
+          className="w-full h-24 p-2 border rounded"
+          placeholder="Enter your text here..."
+          value={textContent}
+          onChange={(e) => setTextContent(e.target.value)}
+        />
         </div>
         <div className="flex flex-1">
           <div className="flex flex-col space-y-2 flex-1">
