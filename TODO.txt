@@ -1,4 +1,6 @@
-add a button to read pgn and on the chess board
+need alternate background ligth gray darker gray for each variation cell
 
-read using like we did in react-chess-basic
+remove the figurine for the move
+
+have non breaking for move couples
 

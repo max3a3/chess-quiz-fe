@@ -1,0 +1,63 @@
+[Event "🎩 Repertoire for the E4 PLAYER 🏆: Lewis Gambit"]
+[Result "*"]
+[Variant "Standard"]
+[ECO "C23"]
+[Opening "Bishop's Opening: Lewis Gambit"]
+[StudyName "🎩 Repertoire for the E4 PLAYER 🏆"]
+[ChapterName "Lewis Gambit"]
+[UTCDate "2017.10.31"]
+[UTCTime "23:36:11"]
+[Annotator "https://lichess.org/@/FunnyAnimatorJimTV"]
+[ChapterURL "https://lichess.org/study/j6TDYBj5/te7ATssM"]
+
+1.e4 e5
+  {In the first few chapters we will be looking at the King's Pawn Game, that is
+  1. e4 e5. The main move played by white is 2. Nf3. But I'm not recommending that,
+  and I won't recommend most mainlines as you'll see in most of this study. We go
+  for the tricky lines that can take our opponent out of his opening preparation.}
+  {[%csl Be4,Be5][%cal Gg1f3]}
+2.Bc4
+  {This opening, Bishop's Opening, is a good move for white, and better than 2. Nf3
+  for two reasons: #1: It significantly reduces the theory white needs to know- as
+  these are the 4 main moves played, whereas black can play several things against
+  2. Nf3. #2: It will probably take black out of his theory and preparation- he was
+  probably expecting the move Nf3 and won't know the proper continuations in the
+  next few moves. Here black has 4 main moves. 2...Bc5 will be the main focus of
+  this chapter, as well as the sideline moves. 2...Nf6 will be showcased in the NEXT
+  TWO chapters, the Urusov Gambit.}
+  {[%cal Gf8c5,Gg8f6,Rd7d6,Rb8c6]}
+2...Bc5
+  {Solid-looking move, but white has this fantastic gambit which is...}
+  (2...Nc6 3.Nf3 {Now we have transposed into an Italian Game. You can research
+  this opening as you please, but both sides will generally just keep developing
+  and playing in the center.} {[%csl Gd4][%cal Bf8c5,Bg8f6,Gc2c3,Gd2d4,Re1g1]})
+  (2...d6 3.Nf3 {[%cal Gb8d7,Gg8f6]}
+  3...Nd7 4.d4 {Now we have transposed into a Philidor Defense, which will be
+  covered in chapter 6.} {[%csl Rd4][%cal Rd2d4]})
+3.d4!
+  {d4!! Lewis gambit is very, very forcing because...black HAS to accept this. All
+  other moves just lead to disaster for black, such as Bd6. Black will also be very
+  badly placed if he captures with the pawn, which is being played 60% of the time!}
+  {[%csl Rd4][%cal Re5d4,Bc5d4,Rc5d6,Rc5b4]}
+3...Bxd4
+  (3...exd4?? {This is going to be the case if your opponent sees this position
+  first-time, but it's a big, big mistake. No prize for guessing white's next
+  move.}
+  4.Bxf7+ {BAM!}
+  4...Kxf7 5.Qh5+ {[%cal Bh5f7,Bh5c5]}
+  5...g6 6.Qxc5 {Black king is in the wind, and white is threatening another
+  pawn!} {[%csl Gd4,Rf7][%cal Gc5d4]}
+  6...Nc6 7.Nf3 {[%cal Rf3d4]}
+  7...d6 8.Qd5+ {[%cal Rc8e6,Rf3g5]}
+  8...Kg7
+    (8...Be6 9.Ng5+ {[%csl Re6,Rf7][%cal Rg5e6,Rg5f7]})
+  9.Nxd4 {[%csl Ge4,Rg7]})
+
+  (3...Bd6?? 4.dxe5 Bxe5 5.Bxf7+ {[%csl Re8][%cal Rf7e8]}
+  5...Kxf7 6.Qd5+ {[%cal Bd5f7,Bd5e5]}
+  6...Kf6 7.Nf3 {[%csl Be5][%cal Bf3e5,Bd5e5]}
+  7...Bd6
+    (7...Qe8 8.Bg5+ {[%csl Rf6]}
+    8...Kg6 9.Nxe5+ Kxg5 {[%csl Rg5]})
+  8.Bg5+ {[%cal Rg5d8]}
+  8...Kg6 9.Qf5+ Kh5 10.g4#)

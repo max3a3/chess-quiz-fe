@@ -19,6 +19,7 @@ function CompleteMoveCell({
   first,
   isSubline = false,
   completion,
+
 }: {
   targetRef: React.RefObject<HTMLDivElement | null>;
   annotations: Annotation[];

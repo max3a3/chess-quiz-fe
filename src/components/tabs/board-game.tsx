@@ -78,7 +78,10 @@ const BoardGame = () => {
       : undefined;
 
   const readPgn = async () => {
-    const response = await fetch('/data/danya.pgn');
+    // const response = await fetch('/data/danya.pgn');
+    // const response = await fetch('/data/mycourse-input.pgn');
+    // const response = await fetch('/data/my-endgame-input.pgn');
+    const response = await fetch('/data/my-opening-short.pgn');
     const pgnText = await response.text();
     loadPgn(pgnText)
   }

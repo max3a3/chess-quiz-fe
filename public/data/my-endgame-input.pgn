@@ -1,0 +1,65 @@
+[Event "Silman's Endgame Course: Class E (1000-1199): Bishop vs. Queen"]
+[Result "*"]
+[Variant "Standard"]
+[ECO "?"]
+[Opening "?"]
+[StudyName "Silman's Endgame Course: Class E (1000-1199)"]
+[ChapterName "Bishop vs. Queen"]
+[FEN "5B2/8/8/6K1/8/8/p1k5/8 b - - 0 1"]
+[SetUp "1"]
+[UTCDate "2024.06.03"]
+[UTCTime "19:41:52"]
+[Annotator "https://lichess.org/@/ReleaseTheBats"]
+[ChapterURL "https://lichess.org/study/TEPNijBW/8rA40h7j"]
+
+{Black to move. Bishop vs. Queen There is no contest! One poor Bishop can't hope
+to face off against a mighty Queen! Inexperienced players occasionally think that
+a lone minor piece (i.e., a Bishop or Knight) might be able to put up some resistance
+versus a lone Queen. Let me assure you that nothing could be further from the truth!
+We will explore both possibilities (Bishop vs. Queen and Knight vs. Queen) and demonstrate
+beyond any shadow of a doubt that the poor minor piece is completely outgunned.}
+1...a1=Q
+  {It's important that Black promote his pawn immediately else White will prevent
+  it by Bg7. Black should treat a Queen vs. Bishop situation in the same way as a
+  King and Queen vs. lone King. The only difference: you must be a bit careful about
+  stepping onto the colored squares controlled by the Bishop. === Useful Advice ===
+  In a Queen vs. dark-squared Bishop endgame, stay on light squares as often as possible
+  and the Bishop becomes a non-entity.}
+2.Bd6 Kd3
+  {The game can't be won without help from the King!}
+3.Kf5 Qf1+
+  {Black will patiently kick the enemy King around a bit, and, after some prodding,
+  make it give ground to Black's monarch.}
+4.Ke5 Qe2+
+  {Black's Queen continues to torment White's King.}
+5.Kf5 Qh5+
+  {Finally pushing the King back, since 6.Kf4 Qh2+ wins the Bishop.}
+6.Kf6
+  (6.Kf4? Qh2+ {[%csl Rd6]})
+6...Ke4
+  {Black's King will always step closer to White's whenever it's possible to do so.}
+7.Bf8
+  {Trying not to move the Bishop too far from the King since that could easily lead
+  to its loss.}
+  (7.Bg3? Qf3+ {[%csl Rg3]})
+  (7.Bc7 Qh6+ 8.Ke7 Kd5 9.Bd8 Qg7+ 10.Ke8 Ke6 {[%cal Gg7g8]})
+  (7.Be7 Qh6+ 8.Kf7 Kf5 {And Black's progress is obvious.})
+7...Qe5+
+  {Black uses the Box technique.}
+  {[%cal Ge5e8,Ge5h5]}
+8.Kg6 Qe8+
+  {Threatening the King and Bishop at the same time.}
+9.Kg7 $7 Kf5
+  {Tightening the Box until mate occurs.}
+10.Ba3 Qg6+ 11.Kh8
+  (11.Kf8 Ke6 {[%csl Gf7][%cal Gg6f7]})
+11...Ke6
+  {[%csl Gg8][%cal Ge6f7,Gg6g8]}
+12.Be7 Kf7!
+  (12...Kxe7?? {Stalemate!})
+13.Bf8 Qg8#
+  {Black won by treating the endgame as a King and Queen vs. lone King ending --
+  the Bishop was more ghost than threat, and in some cases its presence helped Black
+  avoid stalemate!}
+  (13...Kxf8?? {Stalemate.})
+*
